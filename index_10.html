@@ -1,0 +1,857 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Earnings Watch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: a sticky index rail with a presenter timer on the left, a 1120px reading column, and full-bleed 3D stages. Main flow = demo, Tuesday evidence, team, oversight; everything after is backup. */
+  :root{
+    --paper:#f1f4f7; --surface:#ffffff; --surface-2:#e8edf2; --ink:#101a26; --ink-2:#48566a; --muted:#7c899a;
+    --line:#d3dbe4; --line-strong:#aeb9c6; --shadow:0 20px 50px rgba(16,26,38,.12);
+    --accent:#0f6f6b; --accent-ink:#0a5250; --accent-wash:#dcefed; --copper:#b4552b; --copper-wash:#f7e6dc;
+    --good:#0ca30c; --good-ink:#0a6b0a; --good-wash:#e3f4e3; --warn:#e0a000; --warn-ink:#684700; --warn-wash:#fff1cc; --crit:#c93a3a; --crit-ink:#8f2626; --crit-wash:#f9e1e1;
+    --font-display:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --stage:#0f1b26; --stage-ink:#e8eef4; --stage-line:rgba(232,238,244,.14);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      color-scheme:dark;
+      --paper:#0e1419; --surface:#161d25; --surface-2:#1d2630; --ink:#e8edf2; --ink-2:#b4c0cd; --muted:#8290a0;
+      --line:#2a3541; --line-strong:#3a4855; --shadow:0 20px 50px rgba(0,0,0,.45);
+      --accent:#2ba69f; --accent-ink:#8ad9d3; --accent-wash:#14363a; --copper:#e2906a; --copper-wash:#3a2418;
+      --good-ink:#6fd36f; --good-wash:#15301a; --warn-ink:#ffd66b; --warn-wash:#3a2d0b; --crit-ink:#ff8a8a; --crit-wash:#3d1717;
+      --stage:#0a1118; --stage-ink:#e8eef4; --stage-line:rgba(232,238,244,.14);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --paper:#0e1419; --surface:#161d25; --surface-2:#1d2630; --ink:#e8edf2; --ink-2:#b4c0cd; --muted:#8290a0;
+    --line:#2a3541; --line-strong:#3a4855; --shadow:0 20px 50px rgba(0,0,0,.45);
+    --accent:#2ba69f; --accent-ink:#8ad9d3; --accent-wash:#14363a; --copper:#e2906a; --copper-wash:#3a2418;
+    --good-ink:#6fd36f; --good-wash:#15301a; --warn-ink:#ffd66b; --warn-wash:#3a2d0b; --crit-ink:#ff8a8a; --crit-wash:#3d1717;
+    --stage:#0a1118; --stage-ink:#e8eef4; --stage-line:rgba(232,238,244,.14);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent-ink)}
+  button{font:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  h1,h2,h3{font-family:var(--font-display);font-weight:600;letter-spacing:-.005em;text-wrap:balance;margin:0}
+  h1{font-size:clamp(30px,4.2vw,50px);line-height:1.06}
+  h2{font-size:clamp(26px,3.2vw,38px);line-height:1.12;margin-bottom:10px}
+  h3{font-size:20px;line-height:1.25;margin-bottom:8px}
+  h4{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);margin:0 0 8px;font-weight:600}
+  p{margin:0 0 12px;max-width:68ch}
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink);font-weight:600;margin:0 0 10px}
+  .mono{font-family:var(--font-mono);font-size:.92em}
+  .muted{color:var(--muted)}
+  .sec2{color:var(--ink-2)}
+  .small{font-size:14px;line-height:1.5}
+  .xs{font-size:12.5px;line-height:1.45;color:var(--muted)}
+  code{font-family:var(--font-mono);font-size:.9em;background:var(--surface-2);border-radius:4px;padding:0 5px}
+  .progress{position:fixed;left:0;right:0;top:env(safe-area-inset-top,0px);height:3px;z-index:30;background:transparent}
+  .progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .15s linear}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+  .topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
+    padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px}
+  .topbar-in{max-width:1360px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .brand{font-family:var(--font-display);font-weight:600;font-size:18px;display:flex;align-items:center;gap:10px}
+  .brand i{width:10px;height:10px;border-radius:2px;background:var(--accent);display:inline-block;transform:rotate(45deg)}
+  .topbar .spacer{flex:1}
+  .btn{border:1px solid var(--line-strong);background:var(--surface);border-radius:8px;padding:7px 12px;font-size:14px;font-weight:500;cursor:pointer;color:var(--ink);text-decoration:none;display:inline-block}
+  .btn:hover{border-color:var(--accent)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.ghost{background:transparent}
+  .btn.sm{padding:5px 10px;font-size:13px}
+  .shell{max-width:1360px;margin:0 auto;display:grid;grid-template-columns:236px minmax(0,1fr);gap:36px;
+    padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 60px}
+  .rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px);align-self:start;padding-top:28px}
+  .rail ol{list-style:none;padding:0;margin:0;border-left:1px solid var(--line)}
+  .rail li a{display:block;padding:6px 0 6px 14px;margin-left:-1px;border-left:2px solid transparent;color:var(--ink-2);text-decoration:none;font-size:14px;line-height:1.3}
+  .rail li a:hover{color:var(--ink)}
+  .rail li a.on{border-left-color:var(--accent);color:var(--ink);font-weight:600}
+  .rail li.backup a{color:var(--muted);font-size:13px}
+  .rail .num{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-right:6px}
+  .rail .divider{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:10px 0 4px 14px;font-weight:600}
+  .timerbox{margin-top:18px;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--surface)}
+  .timerbox b{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:6px}
+  .timerbox .clock{font-family:var(--font-mono);font-size:30px;line-height:1;font-weight:500;margin:2px 0 6px;font-variant-numeric:tabular-nums}
+  .timerbox .seg{font-size:13px;color:var(--ink-2);margin-bottom:8px}
+  .timerbox .bars{display:flex;gap:3px;height:8px;margin-bottom:8px}
+  .timerbox .bars i{display:block;flex:1;border-radius:999px;background:var(--surface-2);position:relative;overflow:hidden}
+  .timerbox .bars i::after{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--w,0%);background:var(--accent)}
+  .timerbox .bars i.over::after{background:var(--crit)}
+  .timerbox .row{display:flex;gap:6px}
+  main{min-width:0}
+  section.block{padding-top:44px;scroll-margin-top:90px}
+  section.block + section.block{border-top:1px solid var(--line);margin-top:44px}
+  section.block.backup{padding-top:36px}
+  .backup-band{margin-top:48px;border-top:2px solid var(--line-strong);padding-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .backup-band b{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .lede{font-size:19px;color:var(--ink-2);max-width:62ch}
+  .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+  .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+  .grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;min-width:0}
+  .card.tint{background:var(--surface-2);border-color:transparent}
+  .card.copper{border-color:var(--copper)}
+  .tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px 14px;min-width:0}
+  .tile .n{font-family:var(--font-display);font-size:40px;line-height:1;font-weight:600;margin-bottom:6px;font-variant-numeric:tabular-nums}
+  .tile .l{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);font-weight:600}
+  .tile .s{font-size:13px;color:var(--muted);margin-top:6px}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 10px 3px 8px;border-radius:999px;white-space:nowrap;line-height:1.3}
+  .pill i{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .pill.met{background:var(--good-wash);color:var(--good-ink)} .pill.met i{background:var(--good)}
+  .pill.part{background:var(--warn-wash);color:var(--warn-ink)} .pill.part i{background:var(--warn)}
+  .pill.not{background:var(--crit-wash);color:var(--crit-ink)} .pill.not i{background:var(--crit)}
+  .pill.neutral{background:var(--surface-2);color:var(--ink-2)} .pill.neutral i{background:var(--muted)}
+  .pill.human{background:var(--copper-wash);color:var(--copper)} .pill.human i{background:var(--copper)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-size:13px;font-weight:500;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 11px;text-decoration:none}
+  a.chip:hover{border-color:var(--accent);color:var(--accent-ink)}
+  .seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+  .seg button{border:0;background:var(--surface);padding:7px 12px;font-size:13px;font-weight:500;cursor:pointer;color:var(--ink-2)}
+  .seg button+button{border-left:1px solid var(--line)}
+  .seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+  table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.4}
+  th,td{text-align:left;vertical-align:top;padding:9px 10px;border-bottom:1px solid var(--line)}
+  th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);font-weight:600;border-bottom:1px solid var(--line-strong)}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+  .tablewrap table th,.tablewrap table td{padding:10px 12px}
+  .tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--paper);font-size:13px;line-height:1.45;padding:9px 12px;border-radius:8px;max-width:340px;opacity:0;transition:opacity .12s;transform:translate(-50%,calc(-100% - 12px))}
+  .tip.on{opacity:1}
+  .reveal{opacity:1;transform:none;transition:opacity .5s ease,transform .5s ease}
+  .reveal.pre{opacity:.001;transform:translateY(14px)}
+  .tilt{transform-style:preserve-3d;transition:transform .25s ease,box-shadow .25s ease;will-change:transform}
+  .tilt:hover{box-shadow:var(--shadow)}
+  /* run of show */
+  .show{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin:14px 0 6px}
+  .show .s{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+  .show .s b{display:block;font-family:var(--font-mono);font-size:12px;color:var(--accent-ink);margin-bottom:4px}
+  .show .s span{font-size:13px;line-height:1.35;display:block;color:var(--ink)}
+  .show .s.shared{background:var(--copper-wash);border-color:transparent} .show .s.shared b{color:var(--copper)}
+  /* stages */
+  .stage{background:var(--stage);color:var(--stage-ink);border-radius:16px;position:relative;overflow:hidden;margin:18px 0 26px}
+  .stage .in{padding:26px 28px}
+  .stage .eyebrow{color:#8ad9d3}
+  .stage h3{color:var(--stage-ink)}
+  .stage p{color:rgba(232,238,244,.78)}
+  .hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0;min-height:440px}
+  .hero .copy{padding:40px 36px;display:flex;flex-direction:column;justify-content:center;gap:14px}
+  .hero .copy h1{color:var(--stage-ink)}
+  .hero .copy p{color:rgba(232,238,244,.8);font-size:18px}
+  .hero .scene{position:relative;min-height:320px}
+  .hero canvas{display:block;width:100%;height:100%}
+  .hero .fallback{position:absolute;inset:0;display:none;align-items:center;justify-content:center;perspective:900px}
+  .hero .fallback.on{display:flex}
+  .orbit{position:relative;width:260px;height:260px;transform-style:preserve-3d;animation:spin 26s linear infinite}
+  .orbit i{position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:#8ad9d3}
+  .orbit i.hot{width:12px;height:12px;margin:-6px;background:#e2906a;box-shadow:0 0 14px #e2906a}
+  @keyframes spin{from{transform:rotateX(62deg) rotateZ(0)}to{transform:rotateX(62deg) rotateZ(360deg)}}
+  .hero .ticker{position:absolute;left:18px;right:18px;top:14px;overflow:hidden;white-space:nowrap;border-top:1px solid var(--stage-line);border-bottom:1px solid var(--stage-line);padding:7px 0;font-size:12px;color:rgba(232,238,244,.75);font-variant-numeric:tabular-nums;font-family:var(--font-mono);z-index:2}
+  .hero .ticker .track{display:inline-block;animation:tick 44s linear infinite}
+  .hero .ticker .track span{display:inline-block;padding:0 18px}
+  .hero .ticker b{color:#e8eef4;font-weight:600}
+  .hero .ticker i{font-style:normal;font-weight:700}
+  .hero .ticker i.ok{color:#6fd36f}
+  .hero .ticker i.q{color:#ffd66b}
+  @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .hero .legend{position:absolute;left:18px;bottom:14px;font-size:12px;color:rgba(232,238,244,.7);display:flex;gap:14px;flex-wrap:wrap}
+  .hero .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+  /* demo: window + card */
+  .bydate{display:flex;align-items:flex-end;gap:8px;height:110px;padding:0 4px}
+  .bydate div{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+  .bydate i{display:block;width:100%;background:var(--accent);border-radius:4px 4px 0 0;min-height:4px}
+  .bydate small{font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+  .bydate b{font-size:12px}
+  .democard{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden}
+  .democard .head{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between}
+  .democard .head .nm{font-family:var(--font-display);font-size:26px;font-weight:600}
+  .democard .body{padding:16px 20px;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px}
+  .fig{display:grid;grid-template-columns:120px 1fr;gap:6px 12px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
+  .fig:last-child{border-bottom:0}
+  .fig .lab{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);font-weight:600;padding-top:4px}
+  .fig .val{font-family:var(--font-display);font-size:24px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums}
+  .fig .val small{font-family:var(--font-body);font-size:12px;color:var(--muted);font-weight:400;margin-left:6px}
+  .fig .q{font-family:var(--font-mono);font-size:12.5px;color:var(--ink-2);background:var(--surface-2);border-radius:6px;padding:4px 8px;display:inline-block;margin-top:6px;max-width:100%;overflow-wrap:anywhere}
+  .fig .as{font-size:13px;color:var(--ink-2);margin-top:6px}
+  .quoteblock{border-left:3px solid var(--accent);background:var(--surface-2);border-radius:0 10px 10px 0;padding:12px 14px;margin:0 0 12px}
+  .quoteblock .qq{font-family:var(--font-display);font-size:17px;line-height:1.4}
+  .quoteblock .who{font-size:12px;color:var(--muted);margin-top:6px}
+  .quoteblock .verdict{margin-top:8px;font-size:13px;color:var(--ink-2)}
+  .fund{font-size:12.5px}
+  .fund td,.fund th{padding:5px 6px}
+  /* tuesday form */
+  .form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .form label{display:grid;gap:4px;font-size:13px;color:var(--ink-2);font-weight:500}
+  .form input,.form textarea,.form select{font:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--line-strong);border-radius:8px;padding:8px 10px;width:100%}
+  .form textarea{min-height:110px;resize:vertical}
+  .form .full{grid-column:1/-1}
+  .pending{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--warn-ink);background:var(--warn-wash);border-radius:999px;padding:4px 12px;font-weight:600}
+  .pending i{width:8px;height:8px;border-radius:50%;background:var(--warn);animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .status-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+  /* team table */
+  .team td[contenteditable]{outline:none;border-radius:6px;min-width:160px}
+  .team td[contenteditable]:focus{background:var(--accent-wash)}
+  .team .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--copper);background:var(--copper-wash);border-radius:4px;padding:1px 6px;margin-right:6px;vertical-align:1px}
+  /* iso stack */
+  .iso-wrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px;align-items:center}
+  .iso{position:relative;height:400px;perspective:1400px;perspective-origin:50% 40%}
+  .iso .stack{position:absolute;left:50%;top:52%;width:300px;height:190px;transform:translate(-50%,-50%) rotateX(58deg) rotateZ(-38deg);transform-style:preserve-3d}
+  .layer{position:absolute;inset:0;border-radius:12px;border:1px solid var(--stage-line);background:rgba(255,255,255,.05);transform-style:preserve-3d;cursor:pointer;transition:transform .35s ease,background .25s,border-color .25s;display:flex;align-items:flex-end;padding:12px 14px}
+  .layer .lab{font-family:var(--font-mono);font-size:13px;color:rgba(232,238,244,.9);letter-spacing:.04em;white-space:nowrap;transform:translateZ(1px)}
+  .layer:hover{background:rgba(138,217,211,.14);border-color:rgba(138,217,211,.6)}
+  .layer.on{background:rgba(226,144,106,.18);border-color:#e2906a;box-shadow:0 0 0 1px #e2906a}
+  .iso-detail{min-height:240px}
+  .iso-detail h3{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .iso-detail .k{font-family:var(--font-mono);font-size:12px;color:#8ad9d3;border:1px solid rgba(138,217,211,.5);border-radius:6px;padding:1px 7px}
+  .iso-detail ul{margin:0;padding-left:20px;color:rgba(232,238,244,.85);font-size:15px}
+  .iso-detail li{margin-bottom:6px}
+  .iso-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+  .iso-nav button{border:1px solid var(--stage-line);background:transparent;color:rgba(232,238,244,.8);border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer}
+  .iso-nav button[aria-pressed="true"]{background:#e2906a;border-color:#e2906a;color:#1a0f09;font-weight:600}
+  /* cube */
+  .cube-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:24px;align-items:center}
+  .cube-stage{height:360px;perspective:1100px;display:flex;align-items:center;justify-content:center;touch-action:none;cursor:grab;user-select:none}
+  .cube-stage:active{cursor:grabbing}
+  .cube{position:relative;width:240px;height:240px;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+  .cube.drag{transition:none}
+  .face{position:absolute;inset:0;border:1px solid rgba(138,217,211,.5);background:rgba(15,27,38,.86);border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;backface-visibility:hidden}
+  .face .fn{font-family:var(--font-mono);font-size:11px;color:#8ad9d3;letter-spacing:.08em}
+  .face .ft{font-family:var(--font-display);font-size:19px;line-height:1.2;color:var(--stage-ink);font-weight:600}
+  .face .fd{font-size:12px;color:rgba(232,238,244,.75)}
+  .face.on{border-color:#e2906a;box-shadow:0 0 0 1px #e2906a,0 0 30px rgba(226,144,106,.25)}
+  .cube-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+  .cube-nav button{border:1px solid var(--stage-line);background:transparent;color:rgba(232,238,244,.8);border-radius:8px;width:34px;height:34px;font-weight:600;cursor:pointer}
+  .cube-nav button[aria-pressed="true"]{background:#e2906a;border-color:#e2906a;color:#1a0f09}
+  .cube-detail .where{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+  .cube-detail .where span{font-size:12px;border:1px solid var(--stage-line);border-radius:999px;padding:3px 9px;color:rgba(232,238,244,.8)}
+  .cube-detail .where span.hit{border-color:#e2906a;color:#ffd9c4}
+  .cube-detail p{font-size:15px}
+  /* requirements */
+  .req-tools{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:14px 0 16px}
+  .req{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .req .card{display:grid;gap:8px;grid-template-rows:auto auto 1fr auto}
+  .req .id{font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+  .req .t{font-weight:600;font-size:16px;line-height:1.3}
+  .req .ev{font-size:13px;color:var(--ink-2);line-height:1.45}
+  .req .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+  .req .cat{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .req .card[hidden]{display:none}
+  /* risk */
+  .risk-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+  .matrix3d{perspective:1200px}
+  .mx{display:grid;grid-template-columns:28px repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(90px,auto)) 28px;gap:6px;transform:rotateX(14deg);transform-origin:50% 100%;transition:transform .4s ease}
+  .matrix3d:hover .mx{transform:rotateX(0)}
+  .mx .ax{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;justify-content:center}
+  .mx .ax.y{writing-mode:vertical-rl;transform:rotate(180deg)}
+  .mx .cell{border-radius:10px;padding:8px;display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start;border:1px solid var(--line)}
+  .mx .cell.l{background:var(--good-wash)} .mx .cell.m{background:var(--warn-wash)} .mx .cell.h{background:var(--crit-wash)}
+  .rk{font-family:var(--font-mono);font-size:12px;font-weight:600;border-radius:6px;padding:3px 7px;background:var(--surface);border:1px solid var(--line-strong);cursor:pointer;color:var(--ink)}
+  .rk:hover,.rk.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .risk-detail dl{display:grid;grid-template-columns:110px 1fr;gap:6px 12px;margin:10px 0 0;font-size:14px}
+  .risk-detail dt{color:var(--muted)} .risk-detail dd{margin:0}
+  /* checklists, gauge */
+  .checks{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+  .checks li{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;font-size:14px}
+  .checks input{width:18px;height:18px;margin-top:2px;accent-color:var(--accent)}
+  .checks li.done span{color:var(--muted);text-decoration:line-through}
+  .gauge{display:grid;grid-template-columns:150px 1fr;gap:18px;align-items:center}
+  .gauge svg{width:150px;height:150px}
+  .cond{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+  .cond li{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:center;font-size:14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .cond input{width:18px;height:18px;accent-color:var(--accent)}
+  /* heat */
+  .heat{display:grid;grid-template-columns:1.6fr repeat(5,minmax(0,1fr));gap:4px;font-size:13px}
+  .heat .hh{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);font-weight:600;padding:0 6px 6px;align-self:end}
+  .heat .st{padding:6px 8px;font-weight:500;font-size:13px;line-height:1.25;display:flex;align-items:center}
+  .heat .cell{border-radius:8px;padding:6px 8px;display:flex;align-items:baseline;gap:5px;justify-content:center;min-height:42px;border:1px solid transparent}
+  .heat .cell b{font-family:var(--font-display);font-size:21px;line-height:1;font-weight:600}
+  .heat .cell small{font-size:10px;opacity:.85}
+  .heat .cell.me{border-color:var(--copper)}
+  .heat .mean{background:var(--surface-2);color:var(--ink)}
+  .heat .lo{outline:2px solid var(--crit);outline-offset:-2px}
+  footer{max-width:1360px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px;font-size:13px;color:var(--muted);border-top:1px solid var(--line)}
+  @media (max-width:980px){
+    .shell{grid-template-columns:1fr;gap:0}
+    .rail{position:static;padding-top:14px}
+    .rail ol{display:flex;flex-wrap:wrap;gap:4px;border:0}
+    .rail li a{border:1px solid var(--line);border-radius:999px;padding:5px 10px;margin:0;font-size:13px}
+    .rail li a.on{border-color:var(--accent)}
+    .rail .divider{display:none}
+    .hero{grid-template-columns:1fr}
+    .iso-wrap,.cube-wrap,.risk-wrap,.democard .body{grid-template-columns:1fr}
+    .grid3,.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .show{grid-template-columns:repeat(3,minmax(0,1fr))}
+  }
+  @media (max-width:640px){
+    .grid2,.grid3,.grid4,.req,.form,.show{grid-template-columns:1fr}
+    .hero .copy{padding:28px 20px}
+    .iso{height:340px}
+    .iso .stack{width:230px;height:145px}
+    .topbar .pill{font-size:11px}
+    .topbar .btn{padding:6px 10px;font-size:13px}
+    .heat{font-size:11px}
+    .heat .st{font-size:11px}
+    .heat .cell b{font-size:16px}
+    .gauge{grid-template-columns:1fr}
+    .fig{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .orbit{animation:none}
+    .hero .ticker .track{animation:none}
+    .pending i{animation:none}
+    .reveal,.tilt,.cube,.layer,.mx{transition:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" aria-hidden="true"><i id="progress"></i></div>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><i></i>Earnings Watch</div>
+    <span class="pill neutral"><i></i>MGMT 6110 Problem Set 6 · Group 5 · “Watcher”</span>
+    <span class="spacer"></span>
+    <button class="btn ghost" id="themeBtn" type="button" title="Toggle light or dark">Theme</button>
+    <a class="btn primary" href="#demo">Start the demo</a>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="rail" aria-label="Sections">
+    <ol id="railList">
+      <li><a href="#show"><span class="num">01</span>Run of show</a></li>
+      <li><a href="#demo"><span class="num">02</span>Demonstration · 6 min</a></li>
+      <li><a href="#tuesday"><span class="num">03</span>Tuesday 27 Oct · pending</a></li>
+      <li><a href="#team"><span class="num">04</span>Team experience · 5 min</a></li>
+      <li><a href="#oversight"><span class="num">05</span>Oversight · 3 min</a></li>
+      <li class="divider">Backup</li>
+      <li class="backup"><a href="#tool"><span class="num">06</span>How the tool works</a></li>
+      <li class="backup"><a href="#requirements"><span class="num">07</span>Requirements</a></li>
+      <li class="backup"><a href="#risks"><span class="num">08</span>Risk register</a></li>
+      <li class="backup"><a href="#controls"><span class="num">09</span>Proposed controls</a></li>
+      <li class="backup"><a href="#evidence"><span class="num">10</span>Evidence and T1–T8</a></li>
+    </ol>
+    <div class="timerbox">
+      <b>Presenter timer</b>
+      <div class="clock" id="clock">6:00</div>
+      <div class="seg" id="segName">Group 5 demo · 6:00</div>
+      <div class="bars"><i id="bar0"></i><i id="bar1"></i><i id="bar2"></i></div>
+      <div class="row"><button class="btn sm" id="tStart" type="button">Start</button><button class="btn sm ghost" id="tNext" type="button">Next segment</button><button class="btn sm ghost" id="tReset" type="button">Reset</button></div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="stage hero" id="hero">
+      <div class="copy">
+        <h1>Two agents read the SEC every morning. This is what they produced on their first weekend, and what we checked.</h1>
+        <p>Group 5's watcher lists every US company that filed results, saves the figures for a watchlist and two random filers, and a second agent checks them against the 10-Q. The page demonstrates the output, records the team's experience, and sets out what a human still has to check.</p>
+        <div class="chips"><span class="pill met"><i></i>31 distinct figures confirmed · 0 mismatches</span><span class="pill part"><i></i>13 cannot check</span><span class="pill human"><i></i>Human in the loop</span><span class="pill neutral"><i></i>No buy or sell language</span></div>
+      </div>
+      <div class="scene" id="scene">
+        <canvas id="heroCanvas" aria-label="365 results filings orbiting; five pulled into the page"></canvas>
+        <div class="fallback" id="heroFallback"><div class="orbit" id="orbit"></div></div>
+        <div class="ticker" aria-label="Share codes and the figure checked for each company"><div class="track" id="ticker"></div></div>
+        <div class="legend"><span><i style="background:#8ad9d3"></i>365 results filings, 18–25 Oct</span><span><i style="background:#e2906a"></i>5 saved to the page</span><span>Move the mouse to look around</span></div>
+      </div>
+    </div>
+
+    <!-- 01 RUN OF SHOW -->
+    <section class="block" id="show">
+      <p class="eyebrow">01 · Run of show</p>
+      <h2>Six minutes for the watcher, then two shared discussions</h2>
+      <p class="lede">Group 5 has six minutes to demonstrate the watcher's output. The team then contributes to the shared five-minute teamwork discussion and the three-minute oversight discussion. Sections 06 to 10 are backup material and are not presented.</p>
+      <div class="show">
+        <div class="s"><b>0:00–0:45</b><span>The reporting window and who reported</span></div>
+        <div class="s"><b>0:45–1:30</b><span>The two radar picks</span></div>
+        <div class="s"><b>1:30–3:30</b><span>One company's card: four figures with quotes, guidance, a management quote, tone</span></div>
+        <div class="s"><b>3:30–4:30</b><span>What the assessor checked and scored</span></div>
+        <div class="s"><b>4:30–5:30</b><span>Tuesday's run: new results versus older watchlist results</span></div>
+        <div class="s"><b>5:30–6:00</b><span>One named catch from the human check</span></div>
+      </div>
+      <div class="show" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+        <div class="s shared"><b>Shared · 5:00</b><span>Teamwork discussion: who did what, what each check found, one catch, one disagreement and how it was resolved (section 04)</span></div>
+        <div class="s shared"><b>Shared · 3:00</b><span>Oversight discussion: the six structural gaps with their true counts, and the duty check a person still runs (section 05)</span></div>
+      </div>
+      <p class="xs" style="margin-top:10px">Counting note. The four dashboards together show 67 confirmed metric entries and 13 “cannot check” verdicts. The three watchlist companies appear on all four dashboards, so those are not independent observations: the distinct figures are 12 for the watchlist plus 32 for eight radar picks, of which 31 were confirmed, 13 could not be checked yet, and none mismatched.</p>
+    </section>
+
+    <!-- 02 DEMO -->
+    <section class="block" id="demo">
+      <p class="eyebrow">02 · Demonstration · 6 minutes</p>
+      <h2>What the watcher produced on Jo's dashboard</h2>
+      <p class="lede">Live page: <a href="https://ywanwah-earnings-extractor-assessor.vercel.app/" target="_blank" rel="noopener">ywanwah-earnings-extractor-assessor.vercel.app</a>. Everything below is copied from that page's data files; nothing is re-typed.</p>
+
+      <h3 style="margin-top:18px">The reporting window</h3>
+      <div class="grid4" style="margin-bottom:16px">
+        <div class="tile tilt"><div class="n">18–25 Oct</div><div class="l">First window (US dates)</div><div class="s">First run Sun 25 Oct, 11:27 PM Singapore</div></div>
+        <div class="tile tilt"><div class="n">404 → 365</div><div class="l">Hits → results filings</div><div class="s">8-K filings with item 2.02, de-duplicated by accession</div></div>
+        <div class="tile tilt"><div class="n">1</div><div class="l">Watchlist name in the window</div><div class="s">Meta Platforms, filed Wed 21 Oct</div></div>
+        <div class="tile tilt"><div class="n">0</div><div class="l">Filings in Monday's window</div><div class="s">The 6:09 AM run covered Sunday 25 Oct only</div></div>
+      </div>
+      <div class="grid2" style="margin-bottom:18px">
+        <div class="card"><h4>Results filings by US filing date</h4><div class="bydate" id="bydate"></div></div>
+        <div class="card"><h4>Who reported, as the watcher listed them</h4>
+          <div class="tablewrap" style="border:0"><table class="small"><tbody id="filers"></tbody></table></div>
+          <p class="xs" style="margin:8px 0 0">The first 15 of 365 as the brief lists them; the dashboard shows up to 300 with a filter by company, ticker or CIK.</p>
+        </div>
+      </div>
+
+      <h3>The two radar picks</h3>
+      <div class="grid2" style="margin-bottom:18px">
+        <div class="card copper"><div class="chips" style="margin-bottom:8px"><span class="pill human"><i></i>Picked at random</span><span class="pill neutral"><i></i>WCN</span></div><h3>Waste Connections, Inc.</h3><p class="small">Quarter ended 30 September 2026 · results filed Wed 21 Oct 2026 · accession 0001104659-26-117838. Three of four figures confirmed to the 10-Q filed 22 Oct; net income cannot check because the company no longer tags NetIncomeLoss. Guidance: full-year 2026 revenue of approximately $10.09 billion. Tone: positive.</p></div>
+        <div class="card copper"><div class="chips" style="margin-bottom:8px"><span class="pill human"><i></i>Picked at random</span><span class="pill neutral"><i></i>IRDM</span></div><h3>Iridium Communications Inc.</h3><p class="small">Quarter ended 30 September 2026 · results filed Tue 20 Oct 2026 · accession 0001418819-26-000053. All four figures confirmed to the 10-Q filed 20 Oct. No guidance in the release. Tone: positive; the assessor ruled it not supported, since operating income fell 54.9% and net income rose on a $103.9m Aireon gain.</p></div>
+      </div>
+
+      <h3>One company's card, as the page shows it</h3>
+      <div class="seg" id="cardTabs" role="group" aria-label="Choose the company" style="margin:6px 0 12px"><button type="button" data-k="meta" aria-pressed="true">Meta Platforms · watchlist</button><button type="button" data-k="wcn" aria-pressed="false">Waste Connections · radar pick</button></div>
+      <div class="democard" id="democard"></div>
+
+      <h3 style="margin-top:22px">What the assessor checked on this dashboard</h3>
+      <div class="grid3">
+        <div class="tile"><div class="n">19</div><div class="l">Figures confirmed</div><div class="s">Each equals the 10-Q value; EPS to the cent</div></div>
+        <div class="tile"><div class="n">1</div><div class="l">Cannot check</div><div class="s">Waste Connections net income; re-checked each morning</div></div>
+        <div class="tile"><div class="n">0</div><div class="l">Mismatches</div><div class="s">No figure differed from the filing</div></div>
+      </div>
+      <div class="tablewrap" style="margin-top:14px"><table><thead><tr><th>Company</th><th>Figures</th><th>Claims judged</th><th>Tone verdict</th><th class="num">S1 Correct</th><th class="num">S2 Complete</th><th class="num">S3 Useful</th></tr></thead><tbody>
+        <tr><td>Alphabet</td><td>4 confirmed</td><td>2 match, 1 cannot check</td><td>positive · supported</td><td class="num">5</td><td class="num">5</td><td class="num">5</td></tr>
+        <tr><td>Amazon</td><td>4 confirmed</td><td>3 match</td><td>positive · supported</td><td class="num">5</td><td class="num">5</td><td class="num">5</td></tr>
+        <tr><td>Meta Platforms</td><td>4 confirmed</td><td>3 match, 1 does not match</td><td>balanced · supported</td><td class="num">5</td><td class="num">5</td><td class="num">5</td></tr>
+        <tr><td>Waste Connections</td><td>3 confirmed, 1 cannot check</td><td>3 match, 1 cannot check</td><td>positive · supported</td><td class="num">5</td><td class="num">5</td><td class="num">4</td></tr>
+        <tr><td>Iridium</td><td>4 confirmed</td><td>1 match, 1 cannot check</td><td>positive · not supported</td><td class="num">5</td><td class="num">5</td><td class="num">5</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <!-- 03 TUESDAY -->
+    <section class="block" id="tuesday">
+      <p class="eyebrow">03 · Tuesday 27 October</p>
+      <h2>Monday's US reporters, captured after the 6:37 AM run</h2>
+      <div class="chips" style="margin-bottom:12px"><span class="pending" id="tueState"><i></i>Pending: the run has not happened yet</span></div>
+      <p class="lede">The Tuesday 6:07 AM run is the first scheduled run that reads companies which reported on Monday 26 October in the US, after the New York close at 4:00–5:30 AM Singapore. Fill the form from the dashboard after 6:37 AM; it remembers in this browser and the summary card updates.</p>
+      <div class="grid2">
+        <div class="card">
+          <h4>Capture from the dashboard</h4>
+          <div class="form">
+            <label>Sources line: cache filled at<input id="tFetch" placeholder="e.g. 5:52 AM Singapore"></label>
+            <label>Filings dated Mon 26 Oct (US)<input id="tCount" inputmode="numeric" placeholder="e.g. 48"></label>
+            <label class="full">Monday's reporters the watcher listed (one per line, with ticker)<textarea id="tList" placeholder="e.g. Cadence Design Systems (CDNS)&#10;Nucor (NUE)"></textarea></label>
+            <label>Radar picks today<input id="tPicks" placeholder="e.g. Nucor; Brown &amp; Brown"></label>
+            <label>Assessor at 6:37<input id="tAssess" placeholder="e.g. 2 extractions checked: 0 confirmed, 8 cannot check"></label>
+            <label>Alphabet<select id="tGOOGL"><option value="older">Older result (Q2, filed 22 Jul)</option><option value="new">New results today</option></select></label>
+            <label>Amazon<select id="tAMZN"><option value="older">Older result (Q2, filed 30 Jul)</option><option value="new">New results today</option></select></label>
+            <label>Meta Platforms<select id="tMETA"><option value="older">Older result (Q3, filed 21 Oct)</option><option value="new">New results today</option></select></label>
+            <label>Captured at<input id="tWhen" placeholder="e.g. Tue 27 Oct, 6:45 AM"></label>
+          </div>
+          <div class="row" style="margin-top:10px;display:flex;gap:8px"><button class="btn sm" id="tSave" type="button">Mark as captured</button><button class="btn sm ghost" id="tClear" type="button">Clear</button></div>
+        </div>
+        <div>
+          <div class="card" id="tueCard"></div>
+          <div class="card tint" style="margin-top:12px"><h4>What distinguishes new from older</h4><p class="small" style="margin:0">A watchlist card is new when its filing date is Monday 26 October and the run log shows “saved”; it is older when the brief says “no new results since …”. On Monday all three watchlist names were older: Alphabet and Amazon last filed in July, Meta on 21 October. The radar table lists only filings dated Monday; anything from the weekend window stays behind the “show every saved filing” toggle.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 TEAM -->
+    <section class="block" id="team">
+      <p class="eyebrow">04 · Team experience · shared 5-minute discussion</p>
+      <h2>Who did what, and what each check found</h2>
+      <p class="lede">Each member built and ran their own copy of the watcher and assessor; the four dashboards share a template and a watchlist and differ in their random picks. Rows marked <span class="tag" style="display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--copper);background:var(--copper-wash);border-radius:4px;padding:1px 6px">CONFIRM</span> were drafted from the dashboards and are for that member to replace in their own words; the cells are editable and remember in this browser.</p>
+      <div class="tablewrap team"><table id="teamTable"><thead><tr><th style="width:110px">Member</th><th>Work completed</th><th>What their check found</th></tr></thead><tbody></tbody></table></div>
+      <div style="margin:8px 0 18px"><button class="btn sm ghost" id="teamReset" type="button">Reset drafts</button></div>
+      <div class="grid2">
+        <div class="card copper"><h4>One named catch</h4><h3>Amazon's operating-income guidance was missing, and the assessor scored Complete 5/5</h3><p class="small">Jo, 26 October, reading exhibit 99.1 of accession 0001018724-26-000024. The release's outlook section guides Q3 net sales ($197.0–202.0bn) and Q3 operating income ($22.5–26.5bn) and flags an unfavourable FX impact of about 80 basis points. The watcher recorded net sales only; the assessor rated S2 Complete at 5 because what was there was quoted word for word. The same pattern appears on all four dashboards.</p></div>
+        <div class="card"><h4>One disagreement and its resolution</h4><h3>Jo versus the assessor on Amazon's S2</h3><p class="small">The assessor gave 5; Jo gave 3. Resolved by going back to the release: the guided figure exists and is absent from the brief, so the form carries S2 = 3 and the proposed change to the assessor is to re-read the outlook section before scoring Complete. A second, cross-dashboard disagreement: two watchers labelled Meta's tone positive and two balanced; the assessors that saw “positive” ruled it not supported, since reported operating income fell 36.8% after a $9.89bn legal charge, so balanced stands.</p></div>
+      </div>
+    </section>
+
+    <!-- 05 OVERSIGHT -->
+    <section class="block" id="oversight">
+      <p class="eyebrow">05 · Oversight · shared 3-minute discussion</p>
+      <h2>Six structural gaps, with their true counts</h2>
+      <p class="lede">Three appear on all four dashboards, one on three, two on two. Drag the cube or use the buttons; the panel names the dashboards affected and the evidence.</p>
+      <div class="stage"><div class="in">
+        <div class="cube-wrap">
+          <div class="cube-stage" id="cubeStage"><div class="cube" id="cube"></div></div>
+          <div class="cube-detail" id="cubeDetail"><div class="cube-nav" id="cubeNav"></div></div>
+        </div>
+      </div></div>
+      <div class="grid2">
+        <div class="card"><h4>The duty check a person still runs, 7:15 AM</h4><ul class="checks" id="dutyChecks"></ul><div style="margin-top:10px"><button class="btn sm ghost" id="dutyReset" type="button">Reset for tomorrow</button></div></div>
+        <div class="card"><h4>What the agents are good at, and blind to</h4><p class="small">Good at: every confirmed figure equals the 10-Q to the last digit; units in thousands are converted; “cannot check” is used rather than guessed; the assessor overruled two tone calls and flagged Meta's “investments are paying off” on all four dashboards.</p><p class="small" style="margin:0">Blind to: what is absent. A second guidance line, a bank's revenue components, a filing that was never an earnings release, a cache filled the previous evening. The assessor rates the watcher's output, not the world, so a person reads the outlook section and the sources line before a figure is used.</p></div>
+      </div>
+    </section>
+
+    <div class="backup-band"><b>Backup material · not presented</b><span class="small sec2">Sections 06 to 10 hold the detail behind the numbers above: how the pipeline runs, the requirement-by-requirement scoring, the risk register, the proposed operating controls, the evidence ledger and the T1–T8 responses.</span></div>
+
+    <!-- 06 TOOL -->
+    <section class="block backup" id="tool">
+      <p class="eyebrow">06 · Backup · How the tool works</p>
+      <h2>Six layers between EDGAR and the analyst</h2>
+      <div class="stage"><div class="in">
+        <div class="iso-wrap">
+          <div class="iso" id="iso"><div class="stack" id="stack"></div></div>
+          <div class="iso-detail" id="isoDetail"></div>
+        </div>
+      </div></div>
+      <div class="grid3">
+        <div class="card tint"><h3>Schedule</h3><p class="small">Watcher 6:07 AM, assessor 6:37 AM, Singapore time, daily. That is 6:07 PM in New York under daylight time and 5:07 PM once US clocks change on 1 November.</p></div>
+        <div class="card tint"><h3>Rules of the check</h3><p class="small">A figure is confirmed when the quote holds it and the 10-Q value is within 0.5%; EPS must match to the cent. Anything unconfirmed is re-checked each morning for 10 days.</p></div>
+        <div class="card tint"><h3>Sources</h3><p class="small">EDGAR full-text search (8-K item 2.02), the submissions API for the watchlist, the companyfacts XBRL API for filed values. No other data source, no connectors, nothing sent.</p></div>
+      </div>
+    </section>
+
+    <!-- 07 REQUIREMENTS -->
+    <section class="block backup" id="requirements">
+      <p class="eyebrow">07 · Backup · Requirements</p>
+      <h2>Eighteen requirements, scored from the 26 October review</h2>
+      <div class="req-tools">
+        <div class="seg" id="reqFilter" role="group" aria-label="Filter by status"><button type="button" data-f="all" aria-pressed="true">All</button><button type="button" data-f="met" aria-pressed="false">Met</button><button type="button" data-f="part" aria-pressed="false">Partly</button><button type="button" data-f="not" aria-pressed="false">Not met</button></div>
+        <div class="seg" id="reqCat" role="group" aria-label="Filter by area"><button type="button" data-c="all" aria-pressed="true">All areas</button><button type="button" data-c="Coverage" aria-pressed="false">Coverage</button><button type="button" data-c="Extraction" aria-pressed="false">Extraction</button><button type="button" data-c="Verification" aria-pressed="false">Verification</button><button type="button" data-c="Reader" aria-pressed="false">Reader</button><button type="button" data-c="Controls" aria-pressed="false">Controls</button></div>
+        <span class="small muted" id="reqCount"></span>
+      </div>
+      <div class="req" id="reqGrid"></div>
+    </section>
+
+    <!-- 08 RISKS -->
+    <section class="block backup" id="risks">
+      <p class="eyebrow">08 · Backup · Risk register</p>
+      <h2>Nine risks, placed by likelihood and impact</h2>
+      <p class="lede">Click a code for the control and owner. These are the team's proposed controls, not assignment requirements.</p>
+      <div class="risk-wrap">
+        <div class="matrix3d"><div class="mx" id="mx"></div></div>
+        <div class="risk-detail" id="riskDetail"></div>
+      </div>
+    </section>
+
+    <!-- 09 CONTROLS -->
+    <section class="block backup" id="controls">
+      <p class="eyebrow">09 · Backup · Proposed operating controls</p>
+      <h2>What we would put in place if the tool were adopted</h2>
+      <p class="lede">Optional improvements proposed by Group 5. They are not PS6 submission requirements, and nothing here is conditional on them.</p>
+      <div class="grid2">
+        <div>
+          <div class="card"><h3>Operating mode</h3><ol class="small" style="padding-left:20px;margin:8px 0 0;line-height:1.55"><li>Human-in-the-loop through the Q3 reporting season: no figure from the page reaches a meeting note without the 7:15 duty check.</li><li>Seven fixes below, the two plumbing fixes first.</li><li>Analyst-optional mode only after the six gate conditions hold for ten consecutive trading mornings.</li><li>Scope stays at reporting and checking; briefs are screened weekly for buy, sell or sizing language.</li></ol></div>
+          <h3 style="margin-top:18px">Seven fixes</h3>
+          <ul class="checks" id="fixList"></ul>
+        </div>
+        <div>
+          <div class="card">
+            <h3>Readiness gate</h3>
+            <div class="gauge"><svg viewBox="0 0 120 120" id="gauge" aria-label="Readiness gauge"></svg><div><div id="gaugeText" class="small"></div><p class="xs" style="margin-top:8px">Tick a condition when it has held for ten consecutive trading mornings. Remembered in this browser only.</p></div></div>
+            <ul class="cond" id="condList" style="margin-top:14px"></ul>
+          </div>
+          <div class="card tint" style="margin-top:12px"><h4>Bank metrics</h4><p class="small" style="margin:0">Keep the filing's labels. For a bank, show net interest income and noninterest income as filed; if a total revenue line is added it is analyst-calculated (NII plus noninterest income) and labelled so; income before income taxes is a filed label and is not operating income. First Hawaiian: NII $174.1m, noninterest income $56.1m, income before taxes $49.9m. BancFirst: NII $136.0m, noninterest income $51.4m, income before taxes $86.1m.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 EVIDENCE + T -->
+    <section class="block backup" id="evidence">
+      <p class="eyebrow">10 · Backup · Evidence ledger and T1–T8</p>
+      <h2>Every filing opened on sec.gov, and the team's T1–T8 responses</h2>
+      <div class="req-tools">
+        <div class="seg" id="ledgerFilter" role="group" aria-label="Filter the ledger"><button type="button" data-f="all" aria-pressed="true">All 11</button><button type="button" data-f="ok" aria-pressed="false">Figures confirmed</button><button type="button" data-f="gap" aria-pressed="false">Found a gap</button></div>
+      </div>
+      <div class="tablewrap"><table class="ledger" id="ledger"><thead><tr><th>Company</th><th>Filing</th><th>What was checked</th><th>Result</th></tr></thead><tbody></tbody></table></div>
+      <div class="card" style="margin-top:18px"><h3>T1–T8, independent responses of 26 October</h3><p class="small sec2">Each member confirmed these were given before the team discussed them. Not reported in class; kept here for the record. Large number is the member's own answer, small is their guess for the team's average; darker is stronger agreement; red outline marks the lowest team mean.</p><div class="heat" id="heat"></div></div>
+    </section>
+  </main>
+</div>
+<footer>MGMT 6110 Problem Set 6 · Group 5 · “Watcher”. Prepared from the four team dashboards and the filings on sec.gov named in the ledger, 26 October 2026. This page reports company results and the checks on them. It is not investment advice.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  'use strict';
+  var store={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+  function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+  function el(tag,cls,html){var e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;}
+  function clear(n){while(n.firstChild)n.removeChild(n.firstChild);}
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var saved=store.get('ewp-theme',null); if(saved) document.documentElement.setAttribute('data-theme',saved);
+  document.getElementById('themeBtn').addEventListener('click',function(){ var r=document.documentElement,t=r.getAttribute('data-theme'); var dark=t?t==='dark':(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches); r.setAttribute('data-theme',dark?'light':'dark'); store.set('ewp-theme',dark?'light':'dark'); drawGauge(); });
+
+  var tip=document.getElementById('tip');
+  document.addEventListener('mousemove',function(e){var t=e.target.closest&&e.target.closest('[data-tip]');if(t){tip.innerHTML=t.getAttribute('data-tip');tip.style.left=e.clientX+'px';tip.style.top=e.clientY+'px';tip.classList.add('on');}else tip.classList.remove('on');});
+
+  var prog=document.getElementById('progress'); var links=[].slice.call(document.querySelectorAll('#railList a')); var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'));});
+  function onScroll(){ var h=document.documentElement; var p=(h.scrollTop)/(h.scrollHeight-h.clientHeight); prog.style.width=(Math.max(0,Math.min(1,p))*100)+'%'; var y=window.scrollY+140, cur=0; secs.forEach(function(s,i){ if(s&&s.offsetTop<=y) cur=i; }); links.forEach(function(a,i){a.classList.toggle('on',i===cur);}); }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+  if(!reduce&&'IntersectionObserver' in window){ var io=new IntersectionObserver(function(es){es.forEach(function(x){if(x.isIntersecting){x.target.classList.remove('pre');io.unobserve(x.target);}});},{rootMargin:'0px 0px -8% 0px'}); [].slice.call(document.querySelectorAll('section.block .card, section.block .tile')).forEach(function(c){ if(c.getBoundingClientRect().top>window.innerHeight){ c.classList.add('reveal','pre'); io.observe(c);} }); }
+
+  function tiltify(n){ n.addEventListener('pointermove',function(e){ if(reduce) return; var r=n.getBoundingClientRect(); var x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5; n.style.transform='perspective(900px) rotateX('+(-y*7)+'deg) rotateY('+(x*9)+'deg) translateZ(4px)'; }); n.addEventListener('pointerleave',function(){ n.style.transform=''; }); }
+  [].slice.call(document.querySelectorAll('.tilt')).forEach(tiltify);
+
+  /* ---------- presenter timer ---------- */
+  var segs=[{n:'Group 5 demo',s:360},{n:'Shared teamwork discussion',s:300},{n:'Shared oversight discussion',s:180}];
+  var tSeg=0,tLeft=segs[0].s,tRun=false,tHandle=null;
+  var clock=document.getElementById('clock'),segName=document.getElementById('segName');
+  function fmt(s){ var neg=s<0; s=Math.abs(s); return (neg?'−':'')+Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+  function paintTimer(){ clock.textContent=fmt(tLeft); clock.style.color=tLeft<0?css('--crit-ink'):tLeft<=30?css('--warn-ink'):''; segName.textContent=segs[tSeg].n+' · '+fmt(segs[tSeg].s); for(var i=0;i<3;i++){ var b=document.getElementById('bar'+i); var w=i<tSeg?100:i>tSeg?0:Math.min(100,(segs[i].s-tLeft)/segs[i].s*100); b.style.setProperty('--w',w+'%'); b.classList.toggle('over',i===tSeg&&tLeft<0); } }
+  function tick(){ tLeft--; paintTimer(); }
+  document.getElementById('tStart').addEventListener('click',function(){ tRun=!tRun; this.textContent=tRun?'Pause':'Start'; if(tRun) tHandle=setInterval(tick,1000); else clearInterval(tHandle); });
+  document.getElementById('tNext').addEventListener('click',function(){ tSeg=Math.min(2,tSeg+1); tLeft=segs[tSeg].s; paintTimer(); });
+  document.getElementById('tReset').addEventListener('click',function(){ tSeg=0; tLeft=segs[0].s; tRun=false; clearInterval(tHandle); document.getElementById('tStart').textContent='Start'; paintTimer(); });
+  paintTimer();
+
+  /* ---------- ticker ---------- */
+  (function(){ var items=['<b>GOOGL</b> Q2 rev 119,796 <i class="ok">✓</i>','<b>AMZN</b> Q2 rev 200,606 <i class="ok">✓</i>','<b>META</b> Q3 rev 64,601 <i class="ok">✓</i>','<b>WCN</b> Q3 rev 2,638.1 <i class="ok">✓</i>','<b>IRDM</b> Q3 rev 245.7 <i class="ok">✓</i>','<b>FHB</b> Q3 NI 63.7 <i class="q">?</i>','<b>XTIA</b> Q2 rev 32.4 <i class="ok">✓</i>','<b>MMS</b> 8-K: no results <i class="q">?</i>','<b>GM</b> Q3 rev 50,015 <i class="ok">✓</i>','<b>BANF</b> Q3 NI 67.3 <i class="q">?</i>','<b>FIX</b> Q3 rev 3,766.3 <i class="ok">✓</i>','USD millions · ✓ confirmed to the 10-Q · ? cannot check yet']; var tk=document.getElementById('ticker'); var h=items.map(function(t){return '<span>'+t+'</span>';}).join(''); tk.innerHTML=h+h; })();
+
+  /* ---------- hero ---------- */
+  (function(){
+    var canvas=document.getElementById('heroCanvas'), scene=document.getElementById('scene'), fb=document.getElementById('heroFallback');
+    function fallback(){ canvas.style.display='none'; fb.classList.add('on'); var o=document.getElementById('orbit'); for(var i=0;i<36;i++){ var d=el('i', i%7===0?'hot':''); var a=i/36*Math.PI*2; d.style.transform='rotateZ('+(a*180/Math.PI)+'deg) translateX('+(100+((i*37)%40))+'px) translateZ('+(((i*53)%60)-30)+'px)'; o.appendChild(d);} }
+    if(!window.THREE){ fallback(); return; }
+    try{
+      var renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:true,alpha:true}); renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+      var sc=new THREE.Scene(); var cam=new THREE.PerspectiveCamera(42,1,.1,100); cam.position.set(0,0.4,7.2);
+      var N=365, pos=new Float32Array(N*3);
+      for(var i=0;i<N;i++){ var u=Math.random()*Math.PI*2, v=Math.random()*Math.PI*2; var R=2.3, r=0.75+Math.random()*0.35; pos[i*3]=(R+r*Math.cos(v))*Math.cos(u); pos[i*3+1]=r*Math.sin(v)*0.9; pos[i*3+2]=(R+r*Math.cos(v))*Math.sin(u); }
+      var g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+      var grp=new THREE.Group(); grp.add(new THREE.Points(g,new THREE.PointsMaterial({color:0x8ad9d3,size:0.055,transparent:true,opacity:.85})));
+      grp.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(1.6,2.1,4,5)),new THREE.LineBasicMaterial({color:0x8ad9d3,transparent:true,opacity:.35})));
+      var hotPos=[[2.6,0.5,0.9],[-2.4,-0.3,1.4],[0.4,0.9,-2.9],[-1.2,-0.8,-2.6],[2.1,-0.6,-1.9]];
+      var hotGeo=new THREE.BufferGeometry(); hotGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array([].concat.apply([],hotPos)),3));
+      grp.add(new THREE.Points(hotGeo,new THREE.PointsMaterial({color:0xe2906a,size:0.16,transparent:true,opacity:.95})));
+      var targets=[[-0.5,0.7,0.01],[0.5,0.7,0.01],[-0.5,0,0.01],[0.5,0,0.01],[0,-0.7,0.01]];
+      hotPos.forEach(function(p,i){ var lg=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p[0],p[1],p[2]),new THREE.Vector3(targets[i][0],targets[i][1],targets[i][2])]); grp.add(new THREE.Line(lg,new THREE.LineBasicMaterial({color:0xe2906a,transparent:true,opacity:.55}))); });
+      sc.add(grp);
+      var mx=0,my=0; scene.addEventListener('pointermove',function(e){ var r=scene.getBoundingClientRect(); mx=((e.clientX-r.left)/r.width-.5); my=((e.clientY-r.top)/r.height-.5); });
+      function size(){ var w=scene.clientWidth, h=scene.clientHeight; renderer.setSize(w,h,false); cam.aspect=w/h; cam.updateProjectionMatrix(); }
+      window.addEventListener('resize',size); size();
+      var t0=performance.now(), running=true;
+      function frame(now){ if(!running) return; var t=(now-t0)/1000; grp.rotation.y=(reduce?0:t*0.12)+mx*0.6; grp.rotation.x=0.18+my*0.35; renderer.render(sc,cam); requestAnimationFrame(frame); }
+      requestAnimationFrame(frame);
+      document.addEventListener('visibilitychange',function(){ running=!document.hidden; if(running) requestAnimationFrame(frame); });
+    }catch(e){ fallback(); }
+  })();
+
+  /* ---------- demo: by-date bars and filers ---------- */
+  var byDate=[['Mon 19',29],['Tue 20',63],['Wed 21',105],['Thu 22',131],['Fri 23',37]]; var bd=document.getElementById('bydate'); var maxD=131;
+  byDate.forEach(function(d){ var w=el('div'); var bar=el('i'); bar.style.height=(d[1]/maxD*78)+'px'; bar.setAttribute('data-tip',d[1]+' results filings dated '+d[0]+' October (US)'); w.appendChild(el('b',null,String(d[1]))); w.appendChild(bar); w.appendChild(el('small',null,d[0])); bd.appendChild(w); });
+  var filers=[['Meta Platforms, Inc.','META','Wed 21 Oct','watchlist'],['Alpha Metallurgical Resources, Inc.','AMR','Fri 23 Oct',''],['American Express Co','AXP','Fri 23 Oct',''],['Autoliv Inc','ALV','Fri 23 Oct',''],['Avidia Bancorp, Inc.','AVBC','Fri 23 Oct',''],['Balchem Corp','BCPC','Fri 23 Oct',''],['Booz Allen Hamilton Holding Corp','BAH','Fri 23 Oct',''],['BV Financial, Inc.','BVFL','Fri 23 Oct',''],['Consumer Portfolio Services, Inc.','CPSS','Fri 23 Oct',''],['ENB Financial Corp','ENBP','Fri 23 Oct',''],['Federal Home Loan Bank of Boston','—','Fri 23 Oct',''],['First Capital Inc','FCAP','Fri 23 Oct',''],['First Citizens BancShares Inc','FCNCA','Fri 23 Oct',''],['First Hawaiian, Inc.','FHB','Fri 23 Oct',''],['First National Corp /VA/','FXNC','Fri 23 Oct','']];
+  var ftb=document.getElementById('filers'); filers.forEach(function(f){ var tr=el('tr'); tr.innerHTML='<td>'+f[0]+(f[3]?' <span class="pill met" style="font-size:10px;padding:1px 7px"><i></i>Watchlist</span>':'')+'</td><td class="mono">'+f[1]+'</td><td class="mono">'+f[2]+'</td>'; ftb.appendChild(tr); });
+
+  /* ---------- demo card ---------- */
+  var cards={
+    meta:{name:'Meta Platforms',sub:'Watchlist · quarter ended 30 September 2026 · results filed Wed 21 Oct 2026 · accession 0001628280-26-066700',unit:'USD millions',
+      figs:[{l:'Revenue',v:'64,601',q:'Revenue | $ | 64,601 | $ | 51,242',s:'met',a:'Extract 64,601 matches the 10-Q (64,601, filed 2026-10-22); the quote holds the number.'},
+            {l:'Operating income',v:'12,988',q:'Income from operations | 12,988 | 20,535',s:'met',a:'Extract 12,988 matches the 10-Q (12,988); the quote holds the number.'},
+            {l:'Net income',v:'9,860',q:'Net income | $ | 9,860 | $ | 2,709',s:'met',a:'Extract 9,860 matches the 10-Q (9,860); the quote holds the number.'},
+            {l:'Diluted EPS',v:'3.83',u:'USD per share',q:'Diluted | $ | 3.83',s:'met',a:'Extract 3.83 matches the 10-Q (3.83) to the cent; the quote holds the number.'}],
+      guidance:{t:'Meta expects fourth-quarter 2026 total revenue of $73 billion to $76 billion.',q:'We expect fourth quarter 2026 total revenue to be in the range of $73-76 billion.'},
+      mgmt:{id:'M1',who:'CEO',q:'Our investments are paying off, the core business is strong, and we\'re seeing velocity across the board.',verdict:'does not match',vs:'not',reason:'Revenue rose 26.1%, but reported operating income fell 36.8% (12,988 v 20,535) and margin halved to 20.1%. Excluding the $9.89bn legal charge, operating income was 22.88bn, up 11.4%. Verdict on the reported figure.'},
+      tone:{label:'balanced',reason:'The CEO says investments are paying off, while the CFO raises the expense outlook and notes youth-related trials and legal scrutiny.',verdict:'supported',vs:'met',vreason:'Revenue +26.1% on a year ago, against reported operating income down 36.8% and operating margin down 20.0 pts after the $9.89bn legal charge.'},
+      fund:[['Revenue (USD millions)','64,601','51,242','+26.1%','60,801','+6.2%'],['Operating income (USD millions)','12,988','20,535','−36.8%','18,775','−30.8%'],['Net income (USD millions)','9,860','2,709','+264.0%','15,848','−37.8%'],['Diluted EPS (USD)','3.83','1.05','+264.8%','6.18','−38.0%'],['Operating margin','20.1%','40.1%','−20.0 pts','30.9%','−10.8 pts'],['Net margin','15.3%','5.3%','+10.0 pts','26.1%','−10.8 pts']],
+      ratings:[['S1 Correct',5,'All four figures confirmed against the 10-Q filed 2026-10-22.'],['S2 Complete',5,'All four figures are there, and the Q4 revenue guidance ($73bn to $76bn) is captured with its quote.'],['S3 Useful',5,'Figures match the 10-Q, and the claims flag the $9.89bn legal charge the analyst needs.']],
+      note:'Our check: the same outlook section also guides full-year 2026 expenses ($175–179bn, captured only as a cost claim) and capex ($135–145bn, not captured). We score S2 at 3.'},
+    wcn:{name:'Waste Connections, Inc.',sub:'Picked at random from the radar · quarter ended 30 September 2026 · results filed Wed 21 Oct 2026 · accession 0001104659-26-117838',unit:'USD millions',
+      figs:[{l:'Revenue',v:'2,638.1',q:'Revenues | $ | 2,458,378 | $ | 2,638,081',s:'met',a:'Extract 2,638.081 matches the 10-Q (2,638.081, filed 2026-10-22); the quote holds it in USD thousands (2,638,081).'},
+            {l:'Operating income',v:'541.7',q:'Operating income | 439,591 | 541,745',s:'met',a:'Extract 541.745 matches the 10-Q (541.745); the quote holds it in USD thousands (541,745).'},
+            {l:'Net income',v:'359.2',q:'Net income | $ | 286,271 | $ | 359,224',s:'part',a:'No filed NetIncomeLoss figure for the quarter to 2026-09-30 yet. The quote holds 359,224 thousand, matching the extract of 359.224.'},
+            {l:'Diluted EPS',v:'1.43',u:'USD per share',q:'Diluted | $ | 1.11 | $ | 1.43',s:'met',a:'Extract 1.43 matches the 10-Q (1.43) to the cent; the quote holds the number.'}],
+      guidance:{t:'Waste Connections now estimates full-year 2026 revenue of approximately $10.09 billion.',q:'Revenue is estimated to be approximately $10.09 billion;'},
+      mgmt:{id:'M2',who:'CEO',q:'we overcame a late quarter surge in diesel pricing to deliver adjusted EBITDA margin* of 34% on underlying margin expansion of 50 basis points',verdict:'matches',vs:'met',reason:'Release table: adjusted EBITDA 895,781 on revenue 2,638,081 is 34.0%, against 33.8% a year ago (830,337 on 2,458,378). Reported operating margin rose 2.7 pts to 20.5%.'},
+      tone:{label:'positive',reason:'The CEO describes a top to bottom beat and says the company is firmly on track to exceed its raised outlook, noting only a diesel price surge.',verdict:'supported',vs:'met',vreason:'Revenue +7.3%, operating income +23.2% and EPS +28.8% on a year ago; operating margin up 2.7 pts to 20.5%.'},
+      fund:[['Revenue (USD millions)','2,638','2,458','+7.3%','2,562','+3.0%'],['Operating income (USD millions)','541.7','439.6','+23.2%','437.6','+23.8%'],['Net income (USD millions)','359.2 (release)','286.3','+25.5%','not filed','n/a'],['Diluted EPS (USD)','1.43','1.11','+28.8%','1.17','+22.2%'],['Operating margin','20.5%','17.9%','+2.7 pts','17.1%','+3.5 pts'],['Net margin','13.6%','11.6%','+2.0 pts','not filed','n/a']],
+      ratings:[['S1 Correct',5,'Revenue, operating income and EPS confirmed against the 10-Q; net income has no filed figure yet, but its quote holds the number.'],['S2 Complete',5,'All four figures are there, and the full-year revenue estimate (about $10.09bn) is captured with its quote.'],['S3 Useful',4,'Usable before 8:30 AM; only net income still lacks a filed 10-Q figure.']],
+      note:'Our check: the 10-Q is on file but no longer carries NetIncomeLoss, so the page\'s promise to confirm “until the 10-Q is filed” cannot be kept without a fallback tag.'}
+  };
+  var vLabel={met:'Confirmed',part:'Cannot check',not:'Does not match'};
+  function renderCard(k){
+    var c=cards[k]; var box=document.getElementById('democard'); clear(box);
+    var head=el('div','head','<div><div class="nm">'+c.name+'</div><div class="small sec2">'+c.sub+'</div></div><div class="chips"><span class="pill neutral"><i></i>'+c.unit+'</span></div>'); box.appendChild(head);
+    var body=el('div','body'); var left=el('div'); var right=el('div');
+    left.appendChild(el('h4',null,'Four figures, each with the watcher\'s quote and the assessor\'s verdict'));
+    c.figs.forEach(function(f){ left.appendChild(el('div','fig','<div class="lab">'+f.l+'</div><div><div class="val">'+f.v+'<small>'+(f.u||c.unit)+'</small> <span class="pill '+f.s+'" style="vertical-align:4px;margin-left:8px"><i></i>'+vLabel[f.s]+'</span></div><div class="q">“'+esc(f.q)+'”</div><div class="as">Assessor: '+f.a+'</div></div>')); });
+    left.appendChild(el('h4',null,'<span style="display:block;margin-top:14px">Fundamentals, from the 10-Q</span>'));
+    var t=el('table','fund'); t.innerHTML='<thead><tr><th>Fundamental</th><th class="num">This quarter</th><th class="num">A year ago</th><th class="num">Change</th><th class="num">Previous quarter</th><th class="num">Change</th></tr></thead>'; var tb=el('tbody'); c.fund.forEach(function(r){ var tr=el('tr'); tr.innerHTML='<td>'+r[0]+'</td>'+r.slice(1).map(function(x){return '<td class="num">'+x+'</td>';}).join(''); tb.appendChild(tr); }); t.appendChild(tb); var tw=el('div','tablewrap'); tw.style.border='0'; tw.appendChild(t); left.appendChild(tw);
+    right.appendChild(el('h4',null,'Guidance'));
+    right.appendChild(el('div','quoteblock','<div>'+c.guidance.t+'</div><div class="who">Quote: “'+esc(c.guidance.q)+'”</div>'));
+    right.appendChild(el('h4',null,'What management says, against the numbers'));
+    right.appendChild(el('div','quoteblock','<div class="qq">“'+esc(c.mgmt.q)+'”</div><div class="who">'+c.mgmt.id+' · '+c.mgmt.who+'</div><div class="verdict"><span class="pill '+c.mgmt.vs+'"><i></i>'+c.mgmt.verdict+'</span> '+c.mgmt.reason+'</div>'));
+    right.appendChild(el('h4',null,'Tone'));
+    right.appendChild(el('div','quoteblock','<div><b>'+c.tone.label+'.</b> '+c.tone.reason+'</div><div class="verdict"><span class="pill '+c.tone.vs+'"><i></i>Assessor: '+c.tone.verdict+'</span> '+c.tone.vreason+'</div>'));
+    right.appendChild(el('h4',null,'Assessor\'s ratings of the watcher, out of 5'));
+    var rt=el('table','fund'); var rb=el('tbody'); c.ratings.forEach(function(r){ var tr=el('tr'); tr.innerHTML='<td style="white-space:nowrap"><b>'+r[0]+'</b></td><td class="num" style="font-family:var(--font-display);font-size:18px">'+r[1]+'</td><td class="small sec2">'+r[2]+'</td>'; rb.appendChild(tr); }); rt.appendChild(rb); right.appendChild(rt);
+    right.appendChild(el('div','card copper','<div class="small" style="margin:0"><span class="pill human" style="margin-right:6px"><i></i>Human check</span>'+c.note+'</div>')).style.marginTop='10px';
+    body.appendChild(left); body.appendChild(right); box.appendChild(body);
+  }
+  document.getElementById('cardTabs').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; [].slice.call(e.currentTarget.children).forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');}); renderCard(b.getAttribute('data-k')); });
+  renderCard('meta');
+
+  /* ---------- tuesday capture ---------- */
+  var tFields=['tFetch','tCount','tList','tPicks','tAssess','tGOOGL','tAMZN','tMETA','tWhen']; var tData=store.get('ewp-tue',{});
+  tFields.forEach(function(id){ var n=document.getElementById(id); if(tData[id]!=null) n.value=tData[id]; n.addEventListener('input',function(){ tData[id]=n.value; store.set('ewp-tue',tData); renderTue(); }); n.addEventListener('change',function(){ tData[id]=n.value; store.set('ewp-tue',tData); renderTue(); }); });
+  function renderTue(){
+    var c=document.getElementById('tueCard'); var captured=!!tData.captured; var st=document.getElementById('tueState');
+    st.innerHTML=captured?'<i style="background:var(--good);animation:none"></i>Captured '+esc(tData.tWhen||'')+'':'<i></i>Pending: the run has not happened yet';
+    st.style.background=captured?'var(--good-wash)':''; st.style.color=captured?'var(--good-ink)':'';
+    var list=(tData.tList||'').split('\n').map(function(s){return s.trim();}).filter(Boolean);
+    var wl=[['Alphabet',tData.tGOOGL||'older','Q2, filed 22 Jul'],['Amazon',tData.tAMZN||'older','Q2, filed 30 Jul'],['Meta Platforms',tData.tMETA||'older','Q3, filed 21 Oct']];
+    c.innerHTML='<h4>Tuesday 27 October, after 6:37 AM</h4>'+
+      '<div class="grid3" style="gap:10px;margin-bottom:10px"><div class="tile" style="padding:12px"><div class="n" style="font-size:30px">'+esc(tData.tCount||'—')+'</div><div class="l">Filings dated Mon 26 Oct</div></div><div class="tile" style="padding:12px"><div class="n" style="font-size:30px">'+list.length+'</div><div class="l">Reporters listed</div></div><div class="tile" style="padding:12px"><div class="n" style="font-size:18px;line-height:1.2">'+esc(tData.tFetch||'—')+'</div><div class="l">Cache filled at</div></div></div>'+
+      '<h4>Watchlist: new versus older</h4>'+wl.map(function(w){ return '<div class="status-row"><span>'+w[0]+' <span class="xs">'+(w[1]==='new'?'new results dated Mon 26 Oct':'older result · '+w[2])+'</span></span><span class="pill '+(w[1]==='new'?'met':'neutral')+'"><i></i>'+(w[1]==='new'?'New':'Older')+'</span></div>'; }).join('')+
+      (list.length?'<h4 style="margin-top:10px">Monday\'s reporters</h4><ul class="small" style="padding-left:18px;margin:0;columns:2;column-gap:18px">'+list.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')+'</ul>':'<p class="xs" style="margin-top:10px">Monday\'s reporters appear here once entered.</p>')+
+      (tData.tPicks?'<p class="small" style="margin:10px 0 0"><b>Radar picks:</b> '+esc(tData.tPicks)+'</p>':'')+(tData.tAssess?'<p class="small" style="margin:4px 0 0"><b>Assessor:</b> '+esc(tData.tAssess)+'</p>':'');
+  }
+  document.getElementById('tSave').addEventListener('click',function(){ tData.captured=true; if(!tData.tWhen){ tData.tWhen=document.getElementById('tWhen').value; } store.set('ewp-tue',tData); renderTue(); });
+  document.getElementById('tClear').addEventListener('click',function(){ tData={}; store.set('ewp-tue',tData); tFields.forEach(function(id){ var n=document.getElementById(id); n.value=n.tagName==='SELECT'?'older':''; }); renderTue(); });
+  renderTue();
+
+  /* ---------- team table ---------- */
+  var teamRows=[
+    {m:'Jo',work:'Built and ran Jo\'s dashboard (six runs); reviewed all four dashboards line by line against the filings on sec.gov and the XBRL API; drafted the form answers, the slide deck and this page.',found:'Amazon\'s Q3 operating-income guide ($22.5–26.5bn) missing while Complete scored 5/5; the Sunday brief overwritten by an 11:41 PM re-run; Waste Connections net income can never confirm under the current XBRL tag; every 6:07 run read a cache filled the previous evening.',confirm:false},
+    {m:'Haojia',work:'Built and ran Haojia\'s dashboard, jaylo-dang (four runs); random picks Maximus and General Motors.',found:'On this dashboard the review found the Maximus 8-K was an acquisition announcement rated 5 / 5 / 4 with nothing extracted, and GM\'s guidance quote carried no number while the $14.5–15.5bn range sat in a table.',confirm:true},
+    {m:'Chenxi',work:'Built and ran Chenxi\'s dashboard, annakiwi (four runs); random picks First Hawaiian and XTI Aerospace; its briefs carry the “check by hand” list.',found:'On this dashboard the review found First Hawaiian\'s revenue left blank although NII $174.1m and noninterest income $56.1m are in the release, and scores that moved on a recheck with nothing new filed.',confirm:true},
+    {m:'Shan',work:'Built and ran Shan\'s dashboard, shan2855 (four runs); random picks BancFirst and Comfort Systems; single-column quotes and the right Meta tone.',found:'On this dashboard the review found BancFirst\'s revenue blank and Comfort Systems\' backlog ($17.81bn, up from $9.38bn) and >$1bn cash flow not captured.',confirm:true}
+  ];
+  var teamTb=document.querySelector('#teamTable tbody'); var teamEdits=store.get('ewp-team',{});
+  function renderTeam(){ clear(teamTb); teamRows.forEach(function(r,i){ var tr=el('tr'); var w=teamEdits['w'+i], f=teamEdits['f'+i]; tr.innerHTML='<td><b>'+r.m+'</b></td><td contenteditable="true" spellcheck="false" data-k="w'+i+'">'+(r.confirm&&w==null?'<span class="tag">CONFIRM</span>':'')+esc(w!=null?w:r.work)+'</td><td contenteditable="true" spellcheck="false" data-k="f'+i+'">'+(r.confirm&&f==null?'<span class="tag">CONFIRM</span>':'')+esc(f!=null?f:r.found)+'</td>'; teamTb.appendChild(tr); }); [].slice.call(teamTb.querySelectorAll('td[contenteditable]')).forEach(function(td){ td.addEventListener('blur',function(){ var k=td.getAttribute('data-k'); var txt=td.textContent.replace(/^CONFIRM\s*/,'').trim(); teamEdits[k]=txt; store.set('ewp-team',teamEdits); renderTeam(); }); }); }
+  document.getElementById('teamReset').addEventListener('click',function(){ teamEdits={}; store.set('ewp-team',teamEdits); renderTeam(); });
+  renderTeam();
+
+  /* ---------- cube (oversight) ---------- */
+  var dashes=['Jo\'s dashboard','Chenxi\'s dashboard','Haojia\'s dashboard','Shan\'s dashboard'];
+  var findings=[
+    {t:'Guidance stops at the first number',w:[1,1,1,1],d:'Amazon\'s $22.5–26.5bn operating-income guide is missing on all four dashboards; Meta\'s capex outlook on all four; GM\'s EPS and free-cash-flow guides and XTI\'s margin guide where those were picked. Every assessor still scored Complete 5/5, because it rates completeness from the watcher\'s own output and never re-reads the release\'s outlook section.'},
+    {t:'The morning run reads last night\'s cache',w:[1,1,1,1],d:'All four Monday 6:07 runs cite a GitHub fetch from 8:59–11:30 PM the previous evening, six to nine hours earlier. On a weekday that cache cannot contain the 4:00–5:30 PM New York filings the run exists to catch. Tuesday\'s sources line is the test.'},
+    {t:'“Correct” is 5/5 with unverified figures',w:[1,1,1,1],d:'Every dashboard scores Correct at 5 when the 10-Q is not yet filed; only Useful ever carries the doubt. Maximus was scored Correct 5 with nothing extracted at all.'},
+    {t:'Quotes are table rows with no column header',w:[1,1,1,0],d:'“Revenues | $ | 96,428 | $ | 119,796” lists the prior year first; Meta\'s “Revenue | $ | 64,601 | $ | 51,242” lists the current quarter first. Three dashboards; Shan\'s quotes a single column, which is unambiguous.'},
+    {t:'Bank picks come back with no revenue',w:[0,1,0,1],d:'First Hawaiian (NII $174.1m, noninterest income $56.1m) and BancFirst (NII $136.0m, $51.4m) both have the components in the release; both cards say “not given”. Two dashboards, the two that drew a bank. Any total is analyst-calculated and must be labelled so; income before taxes stays a filed label, not operating income.'},
+    {t:'Scores move with nothing new filed',w:[0,1,1,0],d:'First Hawaiian went from S2 4 and S3 3 to 5 and 4 overnight; Maximus\'s S3 rose from 3 to 4 and its tone verdict flipped. Two dashboards; Shan\'s BancFirst recheck held at 5 / 5 / 4 and Jo\'s had no recheck.'}
+  ];
+  var cube=document.getElementById('cube'), cubeNav=document.getElementById('cubeNav'), cubeDetail=document.getElementById('cubeDetail'), cubeStage=document.getElementById('cubeStage');
+  var faceT=['rotateY(0deg)','rotateY(90deg)','rotateY(180deg)','rotateY(-90deg)','rotateX(90deg)','rotateX(-90deg)'];
+  var faceView=[[0,0],[0,-90],[0,-180],[0,90],[-90,0],[90,0]];
+  findings.forEach(function(f,i){ var d=el('div','face'); d.style.transform=faceT[i]+' translateZ(120px)'; var n=f.w.filter(Boolean).length; d.innerHTML='<span class="fn">GAP '+(i+1)+' OF 6</span><span class="ft">'+f.t+'</span><span class="fd">'+n+' of 4 dashboards</span>'; d.addEventListener('click',function(){ showFace(i); }); cube.appendChild(d); });
+  var rx=-18, ry=-28, cur=0, drag=null;
+  function setRot(){ cube.style.transform='translateZ(-120px) rotateX('+rx+'deg) rotateY('+ry+'deg)'; }
+  function showFace(i){ cur=i; rx=faceView[i][0]-14; ry=faceView[i][1]-24; if(i>=4){ rx=faceView[i][0]; ry=-24; } setRot(); renderCube(); }
+  function renderCube(){ [].slice.call(cube.children).forEach(function(d,i){ d.classList.toggle('on',i===cur); }); clear(cubeNav); findings.forEach(function(f,i){ var b=el('button',null,String(i+1)); b.type='button'; b.setAttribute('aria-pressed',i===cur?'true':'false'); b.addEventListener('click',function(){ showFace(i); }); cubeNav.appendChild(b); }); var old=cubeDetail.querySelector('.cd'); if(old) old.remove(); var f=findings[cur]; var box=el('div','cd'); box.innerHTML='<h3>'+(cur+1)+'. '+f.t+' <span class="xs" style="color:#8ad9d3">· '+f.w.filter(Boolean).length+' of 4</span></h3><div class="where">'+dashes.map(function(n,k){return '<span class="'+(f.w[k]?'hit':'')+'">'+(f.w[k]?'✕ ':'✓ ')+n+'</span>';}).join('')+'</div><p>'+f.d+'</p>'; cubeDetail.appendChild(box); }
+  cubeStage.addEventListener('pointerdown',function(e){ drag={x:e.clientX,y:e.clientY,rx:rx,ry:ry}; cube.classList.add('drag'); cubeStage.setPointerCapture(e.pointerId); });
+  cubeStage.addEventListener('pointermove',function(e){ if(!drag) return; ry=drag.ry+(e.clientX-drag.x)*0.5; rx=drag.rx-(e.clientY-drag.y)*0.5; setRot(); });
+  function endDrag(){ if(!drag) return; drag=null; cube.classList.remove('drag'); }
+  cubeStage.addEventListener('pointerup',endDrag); cubeStage.addEventListener('pointercancel',endDrag);
+  setRot(); renderCube();
+
+  /* duty check */
+  var duty=['Sources line names a fetch after 5:30 AM Singapore today, not the previous evening','Both dots present on the timeline: watcher and assessor ran, with no “source failed”','Zero mismatches; any mismatch is opened in the release and the 10-Q before the meeting','No “cannot check” older than ten mornings; if the 10-Q is on file, note the tag for the fallback list','For each watchlist name used today: outlook section read for guided figures the brief does not carry','For a bank or insurer pick: NII, noninterest income and income before taxes read from the release, labelled as filed','The brief contains no buy, sell or sizing language'];
+  var dutyList=document.getElementById('dutyChecks'); var dutyState=store.get('ewp-duty',[]);
+  function renderDuty(){ clear(dutyList); duty.forEach(function(t,i){ var li=el('li',dutyState[i]?'done':''); var cb=el('input'); cb.type='checkbox'; cb.id='duty'+i; cb.checked=!!dutyState[i]; cb.addEventListener('change',function(){ dutyState[i]=cb.checked; store.set('ewp-duty',dutyState); li.classList.toggle('done',cb.checked); }); var lab=el('label',null,'<span>'+t+'</span>'); lab.setAttribute('for','duty'+i); li.appendChild(cb); li.appendChild(lab); dutyList.appendChild(li); }); }
+  document.getElementById('dutyReset').addEventListener('click',function(){ dutyState=[]; store.set('ewp-duty',dutyState); renderDuty(); });
+  renderDuty();
+
+  /* ---------- iso stack (backup) ---------- */
+  var layers=[
+    {k:'L1',t:'SEC EDGAR',human:false,d:['Full-text search for 8-K filings carrying item 2.02, “Results of Operations and Financial Condition”.','Submissions API for the three watchlist CIKs; companyfacts XBRL for every filed value.','One source. Nothing else is read.']},
+    {k:'L2',t:'GitHub fetch and cache',human:false,d:['A workflow pulls the SEC answers into sec_cache/ and commits them.','The routines read the cache, never EDGAR directly; the cache is accepted for up to 20 hours.','Gap 2 lives here: the Monday 6:07 runs read a cache filled the previous evening.']},
+    {k:'L3',t:'Watcher · 6:07 AM',human:false,d:['Lists who reported since the last run; saves the latest results for Alphabet, Amazon, Meta and two random filers.','Four figures with quotes, guidance, two to four management claims, tone.','Writes extractions.json, radar.json and the day\'s watch brief.']},
+    {k:'L4',t:'Assessor · 6:37 AM',human:false,d:['Checks each quote against the release and each figure against the 10-Q through XBRL (0.5%; EPS to the cent).','Builds the fundamentals table, judges each claim, rates S1 Correct, S2 Complete, S3 Useful.','Re-checks anything unconfirmed for ten mornings; writes assessments.json and the assess brief.']},
+    {k:'L5',t:'Static page and briefs',human:false,d:['A page on Vercel or GitHub Pages reads the JSON and Markdown; no server, no database.','Every card links to the press release and filing index on sec.gov.','Run log, timeline and every brief are kept for the audit trail.']},
+    {k:'L6',t:'Duty analyst · 7:15 AM',human:true,d:['Reads the sources line, the run log and any mismatch or cannot-check verdicts.','Opens the release for any figure that will be used in the 8:30 meeting.','The only layer that can see what is missing. Section 05 is this layer\'s checklist.']}
+  ];
+  var stack=document.getElementById('stack'), isoDetail=document.getElementById('isoDetail'), isoSel=5;
+  layers.forEach(function(L,i){ var d=el('div','layer'); d.style.transform='translateZ('+(i*34)+'px)'; d.innerHTML='<span class="lab">'+L.k+' · '+L.t+'</span>'; if(L.human){ d.style.borderColor='#e2906a'; } d.addEventListener('click',function(){ isoSel=i; renderIso(); }); d.addEventListener('mouseenter',function(){ d.style.transform='translateZ('+(i*34+22)+'px)'; }); d.addEventListener('mouseleave',function(){ d.style.transform='translateZ('+(i*34)+'px)'; }); stack.appendChild(d); });
+  function renderIso(){ [].slice.call(stack.children).forEach(function(d,i){ d.classList.toggle('on',i===isoSel); }); var L=layers[isoSel]; clear(isoDetail); var nav=el('div','iso-nav'); layers.forEach(function(x,i){ var b=el('button',null,x.k); b.type='button'; b.setAttribute('aria-pressed',i===isoSel?'true':'false'); b.addEventListener('click',function(){ isoSel=i; renderIso(); }); nav.appendChild(b); }); isoDetail.appendChild(nav); isoDetail.appendChild(el('h3',null,'<span class="k">'+L.k+'</span>'+L.t+(L.human?' <span class="pill human"><i></i>Human</span>':''))); var ul=el('ul'); L.d.forEach(function(s){ ul.appendChild(el('li',null,s)); }); isoDetail.appendChild(ul); }
+  renderIso();
+
+  /* ---------- requirements (backup) ---------- */
+  var reqs=[
+    {id:'R01',cat:'Coverage',t:'List every US company that filed earnings results since the last run',s:'met',ev:'EDGAR full-text search for 8-K item 2.02, de-duplicated by accession; 365–366 filers for 18–25 Oct on every dashboard, watchlist flagged, 300-row cap with a note.'},
+    {id:'R02',cat:'Coverage',t:'Cover the watchlist: Alphabet, Amazon, Meta',s:'met',ev:'Latest 8-K per CIK from the submissions API; Meta\'s 21 Oct results picked up on the first run.'},
+    {id:'R03',cat:'Coverage',t:'Pick two companies at random from that day\'s filers',s:'part',ev:'Two picks on every dashboard, but one was a Maximus 8-K whose item 2.02 is a leverage ratio beside an acquisition; no replacement was drawn.'},
+    {id:'R04',cat:'Extraction',t:'Revenue, operating income, net income, diluted EPS, each with a quote',s:'met',ev:'31 distinct figures confirmed, none mismatched. Gap: the two bank picks returned revenue and operating income as “not given”; the releases carry NII and noninterest income as filed labels.'},
+    {id:'R05',cat:'Extraction',t:'Write down the guidance in full',s:'not',ev:'Only the first guided number is captured on all four dashboards: Amazon\'s operating-income guide, Meta\'s expense and capex outlook, GM\'s EPS and free-cash-flow guides and XTI\'s margin guide are missing.'},
+    {id:'R06',cat:'Extraction',t:'Two to four things management says, each quoted',s:'met',ev:'Counts of 2–4 everywhere. Selection varies: Comfort Systems\' backlog and cash flow were passed over; one dashboard reused the guidance sentence as a claim.'},
+    {id:'R07',cat:'Extraction',t:'Record the tone of the release',s:'met',ev:'Present everywhere. Two watchers called Meta positive and were overruled by their assessor; two called it balanced.'},
+    {id:'R08',cat:'Verification',t:'Check each quote against the release',s:'met',ev:'quote_found is true for every figure and claim; one assessor also tested bank claims against the release\'s own tables.'},
+    {id:'R09',cat:'Verification',t:'Check each figure against the quarterly filing',s:'met',ev:'XBRL companyfacts, 0.5% tolerance, EPS to the cent. Gap: Waste Connections no longer tags NetIncomeLoss, so one figure can never confirm under the current tag list.'},
+    {id:'R10',cat:'Verification',t:'Build a fundamentals table',s:'met',ev:'This quarter, a year ago, previous quarter, both changes, operating and net margin, for every card.'},
+    {id:'R11',cat:'Verification',t:'Judge management\'s claims against the numbers',s:'met',ev:'Matches, does not match or cannot check with a reason. All four assessors flagged Meta\'s “investments are paying off” against a 36.8% profit fall.'},
+    {id:'R12',cat:'Verification',t:'Rate the watcher: Correct, Complete, Useful',s:'part',ev:'Ratings exist, but Complete is scored from the watcher\'s output and cannot see omissions (5/5 with guidance missing); two dashboards changed scores on a recheck with nothing new filed.'},
+    {id:'R13',cat:'Reader',t:'Usable by a Singapore analyst before 8:30 AM without opening sources',s:'part',ev:'Singapore times, US filing dates flagged, briefs with links. Table-row quotes do not say which column is this quarter on three dashboards.'},
+    {id:'R14',cat:'Controls',t:'Never recommend buying or selling',s:'met',ev:'No buy, sell, overweight, underweight, target-price or outperform language in any page, JSON file or brief; disclaimer shown twice per page.'},
+    {id:'R15',cat:'Controls',t:'Read only SEC sources; no connectors; send nothing',s:'met',ev:'config.json names sec.gov, efts.sec.gov and data.sec.gov only. Confirmed from outputs.'},
+    {id:'R16',cat:'Controls',t:'Run on schedule with data fresh at the time of the run',s:'part',ev:'Both runs fired on time on 26 Oct, but every 6:07 run read a cache filled between 8:59 and 11:30 PM the evening before.'},
+    {id:'R17',cat:'Controls',t:'Keep an audit trail: briefs, run log, sources per run',s:'part',ev:'Run log and sources exist. Briefs are keyed by date, so a re-run overwrote the brief that recorded the backfill on one dashboard.'},
+    {id:'R18',cat:'Controls',t:'Timing that survives US clock changes',s:'part',ev:'6:07 AM Singapore is 6:07 PM New York now and 5:07 PM from 1 November, inside EDGAR\'s filing day.'}
+  ];
+  var reqGrid=document.getElementById('reqGrid'), reqF='all', reqC='all'; var sLabel={met:'Met',part:'Partly',not:'Not met'};
+  reqs.forEach(function(r){ var c=el('div','card tilt'); c.setAttribute('data-s',r.s); c.setAttribute('data-c',r.cat); c.innerHTML='<div class="id">'+r.id+'</div><div class="t">'+r.t+'</div><div class="ev">'+r.ev+'</div><div class="foot"><span class="cat">'+r.cat+'</span><span class="pill '+r.s+'"><i></i>'+sLabel[r.s]+'</span></div>'; reqGrid.appendChild(c); tiltify(c); });
+  function applyReq(){ var n=0; [].slice.call(reqGrid.children).forEach(function(c){ var ok=(reqF==='all'||c.getAttribute('data-s')===reqF)&&(reqC==='all'||c.getAttribute('data-c')===reqC); c.hidden=!ok; if(ok) n++; }); var m=reqs.filter(function(r){return r.s==='met';}).length, p=reqs.filter(function(r){return r.s==='part';}).length, x=reqs.length-m-p; document.getElementById('reqCount').textContent=n+' shown · overall '+m+' met, '+p+' partly, '+x+' not met'; }
+  document.getElementById('reqFilter').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; reqF=b.getAttribute('data-f'); [].slice.call(e.currentTarget.children).forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');}); applyReq(); });
+  document.getElementById('reqCat').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; reqC=b.getAttribute('data-c'); [].slice.call(e.currentTarget.children).forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');}); applyReq(); });
+  applyReq();
+
+  /* ---------- risks (backup) ---------- */
+  var risks=[
+    {k:'K1',t:'Guidance omitted',L:3,I:3,c:'Assessor re-reads the outlook section and docks Complete; duty analyst opens the outlook for any watchlist name.',o:'Tool owner',s:'Open'},
+    {k:'K2',t:'Stale data at the run',L:3,I:3,c:'Fetch forced before 6:07 AM or at run time; sources line checked at 7:15; stale-cache rule in the duty check.',o:'Tool owner',s:'Open'},
+    {k:'K3',t:'Wrong random pick',L:2,I:2,c:'Watcher confirms the exhibit is an earnings release before saving; otherwise records why and redraws.',o:'Tool owner',s:'Open'},
+    {k:'K4',t:'Bank and insurer formats',L:3,I:2,c:'Preserve the filing\'s labels: NII and noninterest income as filed; any total revenue is analyst-calculated and labelled so; income before income taxes is shown under its own name, never as operating income.',o:'Tool owner',s:'Open'},
+    {k:'K5',t:'Audit trail lost',L:1,I:3,c:'Briefs named by run time; never overwrite a brief that saved results.',o:'Tool owner',s:'Open'},
+    {k:'K6',t:'Unstable scores',L:2,I:1,c:'Freeze scores between rechecks unless a new filing arrives.',o:'Tool owner',s:'Open'},
+    {k:'K7',t:'Advice-like language',L:1,I:3,c:'Weekly grep of briefs; disclaimer on page and brief; compliance read.',o:'Compliance',s:'Controlled'},
+    {k:'K8',t:'EDGAR outage or rate limit',L:2,I:2,c:'Retries with pauses; “source failed” flag on the timeline; previous page used with date stated.',o:'Duty analyst',s:'Controlled'},
+    {k:'K9',t:'Over-reliance by analysts',L:2,I:3,c:'Human-in-the-loop mode; no figure to a meeting note without the 7:15 check.',o:'Team',s:'Controlled'}
+  ];
+  var mx=document.getElementById('mx'), riskDetail=document.getElementById('riskDetail'), rSel=0;
+  function renderRisk(){ clear(mx); var Lname=['','Low','Medium','High']; for(var L=3;L>=1;L--){ mx.appendChild(el('div','ax y',Lname[L]+' likelihood')); for(var I=1;I<=3;I++){ var score=L*I; var cell=el('div','cell '+(score>=6?'h':score>=3?'m':'l')); risks.forEach(function(r,i){ if(r.L===L&&r.I===I){ var b=el('button','rk'+(i===rSel?' on':''),r.k); b.type='button'; b.setAttribute('data-tip','<b>'+r.k+' '+r.t+'</b><br>'+Lname[r.L]+' likelihood · '+Lname[r.I]+' impact'); b.addEventListener('click',function(){ rSel=i; renderRisk(); }); cell.appendChild(b); } }); mx.appendChild(cell);} } mx.appendChild(el('div','ax','')); ['Low impact','Medium impact','High impact'].forEach(function(t){ mx.appendChild(el('div','ax',t)); }); var r=risks[rSel]; clear(riskDetail); var c=el('div','card'); c.innerHTML='<div class="chips" style="margin-bottom:8px"><span class="pill neutral"><i></i>'+r.k+'</span><span class="pill '+(r.s==='Open'?'part':'met')+'"><i></i>'+r.s+'</span></div><h3>'+r.t+'</h3><dl><dt>Likelihood</dt><dd>'+Lname[r.L]+'</dd><dt>Impact</dt><dd>'+Lname[r.I]+'</dd><dt>Control</dt><dd>'+r.c+'</dd><dt>Owner</dt><dd>'+r.o+'</dd></dl>'; riskDetail.appendChild(c); }
+  renderRisk();
+
+  /* ---------- controls (backup) ---------- */
+  var fixes=['Refresh the cache before 6:07 AM or fetch at run time','Name briefs by run time; never overwrite a brief that saved results','Guidance as a list of every guided item; assessor re-reads the outlook and docks Complete','Confirm a radar pick is an earnings release before saving; redraw if not','Bank rule: show NII, noninterest income and income before taxes under the filing\'s own labels; mark any total as analyst-calculated','Freeze scores between rechecks; let Correct carry the doubt when the 10-Q is not filed','Quote the column header with the row; add fallback XBRL tags; say “10-Q filed, tagged differently”'];
+  var conds=['Fetch time after 5:30 AM Singapore on every run','Zero mismatches from assessor and duty analyst','Guidance completeness check live and matching a hand sample','Every brief and run-log link resolves to the brief that run wrote','Bank and non-earnings picks handled without a blank card','No advice-language hits in the weekly screen'];
+  var fixState=store.get('ewp-fixes',[]), condState=store.get('ewp-conds',[]);
+  var fixList=document.getElementById('fixList'), condList=document.getElementById('condList');
+  function renderFixes(){ clear(fixList); fixes.forEach(function(t,i){ var li=el('li',fixState[i]?'done':''); var cb=el('input'); cb.type='checkbox'; cb.id='fix'+i; cb.checked=!!fixState[i]; cb.addEventListener('change',function(){ fixState[i]=cb.checked; store.set('ewp-fixes',fixState); li.classList.toggle('done',cb.checked); drawGauge(); }); var lab=el('label',null,'<span>'+(i+1)+'. '+t+'</span>'); lab.setAttribute('for','fix'+i); li.appendChild(cb); li.appendChild(lab); fixList.appendChild(li); }); }
+  function renderConds(){ clear(condList); conds.forEach(function(t,i){ var li=el('li'); var cb=el('input'); cb.type='checkbox'; cb.id='cond'+i; cb.checked=!!condState[i]; cb.addEventListener('change',function(){ condState[i]=cb.checked; store.set('ewp-conds',condState); drawGauge(); }); var lab=el('label',null,t); lab.setAttribute('for','cond'+i); li.appendChild(cb); li.appendChild(lab); li.appendChild(el('span','pill '+(condState[i]?'met':'neutral'),'<i></i>'+(condState[i]?'Held 10 mornings':'Not yet'))); condList.appendChild(li); }); }
+  function drawGauge(){ var nf=fixState.filter(Boolean).length, nc=condState.filter(Boolean).length; var p=(nf/fixes.length*0.4+nc/conds.length*0.6); var svg=document.getElementById('gauge'); clear(svg); var NS='http://www.w3.org/2000/svg'; function arc(r,from,to,stroke,w){ var a0=Math.PI*(1+from), a1=Math.PI*(1+to); var x0=60+r*Math.cos(a0),y0=60+r*Math.sin(a0),x1=60+r*Math.cos(a1),y1=60+r*Math.sin(a1); var path=document.createElementNS(NS,'path'); path.setAttribute('d','M'+x0+' '+y0+' A'+r+' '+r+' 0 '+((to-from)>.5?1:0)+' 1 '+x1+' '+y1); path.setAttribute('fill','none'); path.setAttribute('stroke',stroke); path.setAttribute('stroke-width',w); path.setAttribute('stroke-linecap','round'); svg.appendChild(path); } arc(46,0,1,css('--surface-2'),12); if(p>0) arc(46,0,Math.max(.02,p),p>=1?css('--good'):css('--accent'),12); var t=document.createElementNS(NS,'text'); t.setAttribute('x',60); t.setAttribute('y',62); t.setAttribute('text-anchor','middle'); t.setAttribute('font-size','26'); t.setAttribute('font-weight','600'); t.setAttribute('fill',css('--ink')); t.setAttribute('font-family',css('--font-display')); t.textContent=Math.round(p*100)+'%'; svg.appendChild(t); var s=document.createElementNS(NS,'text'); s.setAttribute('x',60); s.setAttribute('y',80); s.setAttribute('text-anchor','middle'); s.setAttribute('font-size','9'); s.setAttribute('fill',css('--muted')); s.textContent='READY'; svg.appendChild(s); document.getElementById('gaugeText').innerHTML='<b>'+nf+' of '+fixes.length+'</b> fixes shipped and <b>'+nc+' of '+conds.length+'</b> gate conditions held. '+(p>=1?'The gate is met.':'Mode stays human-in-the-loop.'); renderConds(); }
+  renderFixes(); drawGauge();
+
+  /* ---------- ledger (backup) ---------- */
+  var ledger=[
+    {c:'Alphabet',a:'0001652044-26-000066',u:'https://www.sec.gov/Archives/edgar/data/1652044/000165204426000066/googexhibit991q22026.htm',w:'Four figures, column order, CFO highlight quote, $98.0bn other-income sentence, guidance',r:'Figures and quotes exact; no guidance given, correctly recorded',k:'ok'},
+    {c:'Amazon',a:'0001018724-26-000024',u:'https://www.sec.gov/Archives/edgar/data/1018724/000101872426000024/amzn-20260630xex991.htm',w:'Four figures, AWS and advertising growth, full Q3 guidance section',r:'Figures exact; operating-income guide $22.5–26.5bn and ~80 bp FX drag missing on all dashboards',k:'gap'},
+    {c:'Meta Platforms',a:'0001628280-26-066700',u:'https://www.sec.gov/Archives/edgar/data/1326801/000162828026066700/meta-09302026xexhibit991.htm',w:'Four figures, column order, legal charge, outlook paragraph, youth-trial language',r:'Figures exact; expense and capex outlook missing; tone split 2–2 across watchers',k:'gap'},
+    {c:'Iridium',a:'0001418819-26-000053',u:'https://www.sec.gov/Archives/edgar/data/1418819/000141881926000053/pressreleaseq32026.htm',w:'Four figures, guidance presence, CEO remarks',r:'Exact; no guidance in release; dividend increase and EMSS renewal not captured as claims',k:'ok'},
+    {c:'First Hawaiian',a:'0001104659-26-118299',u:'https://www.sec.gov/Archives/edgar/data/36377/000110465926118299/fhb-ex99d1.htm',w:'Net income, EPS, NII, noninterest income, income before taxes, merger items',r:'NII $174.1m and noninterest income $56.1m as filed; revenue left blank',k:'gap'},
+    {c:'XTI Aerospace',a:'0001213900-26-111088',u:'https://www.sec.gov/Archives/edgar/data/1529113/000121390026111088/ea030923001ex99-1.htm',w:'Period covered, four figures, full outlook, risk language',r:'Figures exact; gross-margin guide and going-concern doubt missing',k:'gap'},
+    {c:'Maximus',a:'0001032220-26-000038',u:'https://www.sec.gov/Archives/edgar/data/1032220/000103222026000038/0001032220-26-000038-index.htm',w:'Filing index, 8-K body (Item 2.02 text), sole exhibit',r:'Item 2.02 is a leverage ratio beside a $660m acquisition; not an earnings release',k:'gap'},
+    {c:'General Motors',a:'0001467858-26-000056',u:'https://www.sec.gov/Archives/edgar/data/1467858/000146785826000056/gmq32026pressreleaseandfin.htm',w:'Four figures, every guided range, location of the segment row, special items',r:'Figures exact; guidance quote holds no number; EPS and FCF guides missing',k:'gap'},
+    {c:'Comfort Systems USA',a:'0001104659-26-118156',u:'https://www.sec.gov/Archives/edgar/data/1035983/000110465926118156/fix-ex99d1.htm',w:'Four figures, backlog, cash flow, outlook',r:'Figures exact; backlog $17.81bn and >$1bn cash flow missing',k:'gap'},
+    {c:'BancFirst',a:'0001193125-26-427999',u:'https://www.sec.gov/Archives/edgar/data/760498/000119312526427999/banf-ex99_1.htm',w:'Net income, EPS, NII, noninterest income, income before taxes, NIM, acquisition',r:'NII $136.0m and noninterest income $51.4m as filed; revenue left blank',k:'gap'},
+    {c:'Waste Connections',a:'XBRL company-concept API',u:'https://data.sec.gov/api/xbrl/companyconcept/CIK0001318220/us-gaap/NetIncomeLoss.json',w:'NetIncomeLoss and ProfitLoss series for 2026',r:'NetIncomeLoss ends FY2025; the 10-Q is filed but the recheck can never confirm under the current tags',k:'gap'}
+  ];
+  var ltb=document.querySelector('#ledger tbody'), lf='all';
+  function renderLedger(){ clear(ltb); ledger.forEach(function(r){ if(lf!=='all'&&r.k!==lf) return; var tr=el('tr'); tr.innerHTML='<td><b>'+r.c+'</b></td><td><a class="mono" href="'+r.u+'" target="_blank" rel="noopener">'+r.a+'</a></td><td>'+r.w+'</td><td><span class="pill '+(r.k==='ok'?'met':'part')+'"><i></i>'+(r.k==='ok'?'Confirmed':'Gap found')+'</span><div class="small sec2" style="margin-top:4px">'+r.r+'</div></td>'; ltb.appendChild(tr); }); }
+  document.getElementById('ledgerFilter').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; lf=b.getAttribute('data-f'); [].slice.call(e.currentTarget.children).forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');}); renderLedger(); });
+  renderLedger();
+
+  /* ---------- T1–T8 (backup) ---------- */
+  var T=['T1 Understood teammates\' agents','T2 Checked before relying','T3 Agreed what good looks like','T4 Noticed wrong output quickly','T5 Trust changed after checks','T6 Work shared fairly','T7 Took less time than alone','T8 Would use it in my job'];
+  var team=[{name:'Jo',me:true,own:[4,5,3,2,4,5,5,5],guess:[4,5,3,3,4,5,5,5]},{name:'Haojia',own:[4,5,3,2,4,4,5,5],guess:[4,5,3,2,4,4,5,5]},{name:'Chenxi',own:[4,3,3,2,4,4,4,5],guess:[4,3,3,2,4,4,4,5]},{name:'Shan',own:[5,4,4,4,4,5,5,5],guess:[4,3,4,3,4,4,5,5]}];
+  var ramp={1:'#d9eceb',2:'#a9d6d3',3:'#6fbab5',4:'#2f8f8a',5:'#0f6f6b'};
+  (function(){ var heat=document.getElementById('heat'); ['Statement','Jo','Haojia','Chenxi','Shan','Team mean'].forEach(function(t){heat.appendChild(el('div','hh',t));}); var means=T.map(function(_,i){ return team.reduce(function(a,m){return a+m.own[i];},0)/team.length; }); var min=Math.min.apply(null,means); T.forEach(function(t,i){ heat.appendChild(el('div','st',t)); team.forEach(function(m){ var c=el('div','cell'+(m.me?' me':'')); c.style.background=ramp[m.own[i]]; c.style.color=m.own[i]>=4?'#fff':'#0b1b1a'; c.innerHTML='<b>'+m.own[i]+'</b><small>guess '+m.guess[i]+'</small>'; c.setAttribute('data-tip','<b>'+m.name+'</b> · '+t+'<br>Own '+m.own[i]+' · guessed teammates '+m.guess[i]); heat.appendChild(c); }); heat.appendChild(el('div','cell mean'+(means[i]===min?' lo':''),'<b>'+means[i].toFixed(2).replace(/\.?0+$/,'')+'</b>')); }); })();
+
+  if(location.hash){ var tgt=document.querySelector(location.hash); if(tgt) setTimeout(function(){ tgt.scrollIntoView(); },50); }
+})();
+</script>
+
+</body>
+</html>
