@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-  /* Layout: a sticky index rail with a presenter timer on the left, a 1120px reading column, and full-bleed 3D stages. Main flow = demo, Tuesday evidence, team, oversight; everything after is backup. */
+  /* Layout: a sticky index rail on the left, a 1120px reading column, and full-bleed 3D stages. Main flow = demo, Tuesday evidence, team, oversight; then the evidence ledger, T1–T8 and the files. */
   :root{
     --paper:#f1f4f7; --surface:#ffffff; --surface-2:#e8edf2; --ink:#101a26; --ink-2:#48566a; --muted:#7c899a;
     --line:#d3dbe4; --line-strong:#aeb9c6; --shadow:0 20px 50px rgba(16,26,38,.12);
@@ -76,24 +76,11 @@
   .rail li a{display:block;padding:6px 0 6px 14px;margin-left:-1px;border-left:2px solid transparent;color:var(--ink-2);text-decoration:none;font-size:14px;line-height:1.3}
   .rail li a:hover{color:var(--ink)}
   .rail li a.on{border-left-color:var(--accent);color:var(--ink);font-weight:600}
-  .rail li.backup a{color:var(--muted);font-size:13px}
   .rail .num{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-right:6px}
   .rail .divider{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:10px 0 4px 14px;font-weight:600}
-  .timerbox{margin-top:18px;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--surface)}
-  .timerbox b{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:6px}
-  .timerbox .clock{font-family:var(--font-mono);font-size:30px;line-height:1;font-weight:500;margin:2px 0 6px;font-variant-numeric:tabular-nums}
-  .timerbox .seg{font-size:13px;color:var(--ink-2);margin-bottom:8px}
-  .timerbox .bars{display:flex;gap:3px;height:8px;margin-bottom:8px}
-  .timerbox .bars i{display:block;flex:1;border-radius:999px;background:var(--surface-2);position:relative;overflow:hidden}
-  .timerbox .bars i::after{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--w,0%);background:var(--accent)}
-  .timerbox .bars i.over::after{background:var(--crit)}
-  .timerbox .row{display:flex;gap:6px}
   main{min-width:0}
   section.block{padding-top:44px;scroll-margin-top:90px}
   section.block + section.block{border-top:1px solid var(--line);margin-top:44px}
-  section.block.backup{padding-top:36px}
-  .backup-band{margin-top:48px;border-top:2px solid var(--line-strong);padding-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-  .backup-band b{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
   .lede{font-size:19px;color:var(--ink-2);max-width:62ch}
   .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
   .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
@@ -137,6 +124,19 @@
   .show .s b{display:block;font-family:var(--font-mono);font-size:12px;color:var(--accent-ink);margin-bottom:4px}
   .show .s span{font-size:13px;line-height:1.35;display:block;color:var(--ink)}
   .show .s.shared{background:var(--copper-wash);border-color:transparent} .show .s.shared b{color:var(--copper)}
+  .show.five{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .show.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .show .s b.big{font-size:13px}
+  .segrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
+  .segtag{display:inline-flex;align-items:center;font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fff;background:var(--accent);border-radius:999px;padding:4px 11px;white-space:nowrap;line-height:1.3}
+  .segtag.ref{background:var(--muted)}
+  .segdesc{font-size:13px;color:var(--ink-2);line-height:1.4}
+  .presenter{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--copper);background:var(--copper-wash);border-radius:999px;padding:4px 11px;white-space:nowrap}
+  .presenter::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--copper)}
+  .presenter:empty{display:none}
+  .hero .segtag{align-self:flex-start}
+  .pg-seg{display:inline-block;background:var(--accent);color:#fff;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;letter-spacing:.04em;margin-right:4px;vertical-align:1px}
+  .pg-seg.ref{background:var(--muted)}
   /* stages */
   .stage{background:var(--stage);color:var(--stage-ink);border-radius:16px;position:relative;overflow:hidden;margin:18px 0 26px}
   .stage .in{padding:26px 28px}
@@ -201,6 +201,26 @@
   /* team table */
   .team td{min-width:160px}
   .team td.day{background:var(--surface-2)}
+  /* slide mode */
+  .pager{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:26;display:none;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line-strong);border-radius:999px;padding:6px 8px;box-shadow:var(--shadow);max-width:calc(100vw - 24px)}
+  body.paged .pager{display:flex}
+  .pager .pg-label{font-size:13px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44vw}
+  .pager .pg-count{font-family:var(--font-mono);font-size:12px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+  .pager .btn{border-radius:999px;white-space:nowrap}
+  .pager .btn:disabled{opacity:.4;cursor:default}
+  body.paged footer{padding-bottom:100px}
+  body.paged .stage.hero{display:none}
+  body.paged .stage.hero.page-on{display:grid}
+  body.paged section.block{display:none;border-top:0;margin-top:0;padding-top:30px}
+  body.paged section.block.page-on{display:block}
+  body.paged section.block[data-split] > .sub{display:none}
+  body.paged section.block[data-split] > .sub.sub-on{display:block}
+  body.paged section.block.sub-after > .lede{display:none}
+  body.paged .sub > h3{margin-top:6px}
+  .sub > h3{margin-top:22px}
+  .hint{font-size:12px;color:var(--muted);margin-top:18px;line-height:1.5}
+  .hint kbd{font-family:var(--font-mono);font-size:11px;border:1px solid var(--line-strong);border-radius:4px;padding:0 5px;background:var(--surface)}
+  @media (max-width:640px){ .pager .pg-label{display:none} }
   /* files viewer */
   .files details{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin-bottom:12px}
   .files summary{cursor:pointer;padding:14px 18px;font-weight:600;font-size:15px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;list-style:none}
@@ -303,11 +323,11 @@
     .hero{grid-template-columns:1fr}
     .iso-wrap,.cube-wrap,.risk-wrap,.democard .body{grid-template-columns:1fr}
     .grid3,.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}
-    .show{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .show,.show.five,.show.four{grid-template-columns:repeat(3,minmax(0,1fr))}
   }
   @media (max-width:640px){
     .chips .pill{white-space:normal;text-align:left}
-    .grid2,.grid3,.grid4,.req,.form,.show{grid-template-columns:1fr}
+    .grid2,.grid3,.grid4,.req,.form,.show,.show.five,.show.four{grid-template-columns:1fr}
     .hero .copy{padding:28px 20px}
     .iso{height:340px}
     .iso .stack{width:230px;height:145px}
@@ -337,6 +357,7 @@
     <div class="brand"><i></i>Earnings Watch</div>
     <span class="pill neutral"><i></i>MGMT 6110 Problem Set 6 · Group 5 · “Watcher”</span>
     <span class="spacer"></span>
+    <div class="seg" id="viewSeg" role="group" aria-label="View as slides or one long page"><button type="button" data-v="slides" aria-pressed="true">Slides</button><button type="button" data-v="scroll" aria-pressed="false">Scroll</button></div>
     <button class="btn ghost" id="themeBtn" type="button" title="Toggle light or dark">Theme</button>
     <a class="btn primary" href="#demo">Start the demo</a>
   </div>
@@ -345,34 +366,25 @@
 <div class="shell">
   <nav class="rail" aria-label="Sections">
     <ol id="railList">
-      <li><a href="#show"><span class="num">01</span>Run of show</a></li>
-      <li><a href="#demo"><span class="num">02</span>Demonstration · 6 min</a></li>
-      <li><a href="#tuesday"><span class="num">03</span>Tuesday 27 Oct · captured</a></li>
-      <li><a href="#team"><span class="num">04</span>Team experience · 5 min</a></li>
-      <li><a href="#oversight"><span class="num">05</span>Oversight · 3 min</a></li>
-      <li class="divider">Backup</li>
-      <li class="backup"><a href="#tool"><span class="num">06</span>How the tool works</a></li>
-      <li class="backup"><a href="#requirements"><span class="num">07</span>Requirements</a></li>
-      <li class="backup"><a href="#risks"><span class="num">08</span>Risk register</a></li>
-      <li class="backup"><a href="#controls"><span class="num">09</span>Proposed controls</a></li>
-      <li class="backup"><a href="#evidence"><span class="num">10</span>Evidence and T1–T8</a></li>
-      <li class="backup"><a href="#files"><span class="num">11</span>Prompts, rules and fetch</a></li>
+      <li><a href="#show"><span class="num">01</span>Introduce · 2 min</a></li>
+      <li><a href="#tool"><span class="num">02</span>Workflow · 3 min</a></li>
+      <li><a href="#demo"><span class="num">03</span>Demonstration · 7 min</a></li>
+      <li><a href="#tuesday"><span class="num">04</span>Tuesday 27 Oct · in the demo</a></li>
+      <li><a href="#team"><span class="num">05</span>Team · 4 min</a></li>
+      <li><a href="#oversight"><span class="num">06</span>Oversight · 4 min</a></li>
+      <li><a href="#evidence"><span class="num">07</span>Evidence and T1–T8</a></li>
+      <li><a href="#files"><span class="num">08</span>Prompts, rules and fetch</a></li>
     </ol>
-    <div class="timerbox">
-      <b>Presenter timer</b>
-      <div class="clock" id="clock">6:00</div>
-      <div class="seg" id="segName">Group 5 demo · 6:00</div>
-      <div class="bars"><i id="bar0"></i><i id="bar1"></i><i id="bar2"></i></div>
-      <div class="row"><button class="btn sm" id="tStart" type="button">Start</button><button class="btn sm ghost" id="tNext" type="button">Next segment</button><button class="btn sm ghost" id="tReset" type="button">Reset</button></div>
-    </div>
+    <p class="hint" id="slideHint">Slides: <kbd>→</kbd> <kbd>Page ↓</kbd> or <kbd>Space</kbd> for the next page, <kbd>←</kbd> <kbd>Page ↑</kbd> back; a clicker's buttons work too. Switch to Scroll in the top bar for one long page.</p>
   </nav>
 
   <main>
-    <div class="stage hero" id="hero">
+    <div class="stage hero" id="hero" data-seg="1">
       <div class="copy">
+        <span class="segtag s1">Segment 1 of 5 · 2 min · Introduce</span>
         <h1>Two agents read the SEC every morning. This is what they produced on their first weekend, and what we checked.</h1>
         <p>Group 5's watcher lists every US company that filed results, saves the figures for a watchlist and two random filers, and a second agent checks them against the 10-Q. The page demonstrates the output, records the team's experience, and sets out what a human still has to check.</p>
-        <div class="chips"><span class="pill met"><i></i>25–26 Oct snapshot: 31 figures confirmed · 0 mismatches</span><span class="pill part"><i></i>13 cannot check</span><span class="pill not"><i></i>Tue 27 Oct: all four morning runs failed</span><span class="pill met"><i></i>Chenxi recovered at 12:17 PM</span><span class="pill human"><i></i>Human in the loop</span><span class="pill neutral"><i></i>No buy or sell language</span></div>
+        <div class="chips"><span class="pill met"><i></i>25–26 Oct snapshot: 31 figures confirmed · 0 mismatches</span><span class="pill part"><i></i>13 cannot check</span><span class="pill not"><i></i>Tue 27 Oct: all four morning runs failed</span><span class="pill met"><i></i>Chenxi recovered at 12:17 PM, Jo at 11:11 PM</span><span class="pill human"><i></i>Human in the loop</span><span class="pill neutral"><i></i>No buy or sell language</span></div>
       </div>
       <div class="scene" id="scene">
         <canvas id="heroCanvas" aria-label="365 results filings orbiting; five pulled into the page"></canvas>
@@ -382,33 +394,64 @@
       </div>
     </div>
 
-    <!-- 01 RUN OF SHOW -->
-    <section class="block" id="show">
-      <p class="eyebrow">01 · Run of show</p>
-      <h2>Six minutes for the watcher, then two shared discussions</h2>
-      <p class="lede">Group 5 has six minutes to demonstrate the watcher's output. The team then contributes to the shared five-minute teamwork discussion and the three-minute oversight discussion. Sections 06 to 11 are backup material and are not presented.</p>
+    <!-- 01 INTRODUCE -->
+    <section class="block" id="show" data-seg="1">
+      <div class="segrow"><span class="segtag s1">Segment 1 of 5 · 2 min</span><span class="segdesc">Introduce the task, the analyst audience and what your agent produces</span></div>
+      <p class="eyebrow">01 · Introduce</p>
+      <h2>The task, the audience, and twenty minutes in five segments</h2>
+      <p class="lede">The audience is an equity analyst in Singapore who needs US company results before the 8:30 AM meeting. Two agents read SEC EDGAR for her every morning. The watcher lists every US company that filed results since its last run and, for a watchlist of three and two random filers, saves four figures with their quotes, the guidance, two to four management claims and the tone. The assessor checks each figure against the 10-Q, judges the claims and rates the watcher. Neither recommends buying or selling. Every page carries the tag of the briefing-workflow segment it belongs to; sections 07 and 08 hold the evidence ledger, the T1–T8 responses and the files the routines run from.</p>
+      <div class="show five">
+        <div class="s"><b class="big">Segment 1 · 2:00</b><span>Introduce the task, the analyst audience and what the agents produce. The opening page and this one.</span></div>
+        <div class="s"><b class="big">Segment 2 · 3:00</b><span>Explain the workflow: SEC fetch → watcher → assessor → human review. Section 02.</span></div>
+        <div class="s"><b class="big">Segment 3 · 7:00</b><span>Demonstrate the dashboard and perform the required live SEC source check. Sections 03 and 04.</span></div>
+        <div class="s"><b class="big">Segment 4 · 4:00</b><span>Team roles, the catch (reflection R2) and the disagreement (R3), and how they were resolved. Section 05.</span></div>
+        <div class="s"><b class="big">Segment 5 · 4:00</b><span>Ongoing human oversight: who checks, what they check, when, and the first proposed improvement. Section 06.</span></div>
+      </div>
+      <h3>Inside the seven-minute demonstration</h3>
       <div class="show">
         <div class="s"><b>0:00–0:45</b><span>The reporting window and who reported</span></div>
         <div class="s"><b>0:45–1:30</b><span>The two radar picks</span></div>
         <div class="s"><b>1:30–3:30</b><span>One company's card: four figures with quotes, guidance, a management quote, tone</span></div>
-        <div class="s"><b>3:30–4:30</b><span>What the assessor checked and scored, and a timed live check of Meta's revenue on sec.gov</span></div>
-        <div class="s"><b>4:30–5:30</b><span>Tuesday's run: all four scheduled morning runs failed, Chenxi recovered by hand at 12:17 PM; the 64 Monday reporters, and why</span></div>
-        <div class="s"><b>5:30–6:00</b><span>One named catch from the human check</span></div>
+        <div class="s"><b>3:30–4:30</b><span>What the assessor checked and scored</span></div>
+        <div class="s"><b>4:30–5:30</b><span>The live SEC source check: Meta's USD 64,601 million, its period and units</span></div>
+        <div class="s"><b>5:30–7:00</b><span>Tuesday's run: all four scheduled morning runs failed; Chenxi recovered by hand at midday, Jo at 11 PM; the 64 Monday reporters</span></div>
       </div>
-      <div class="show" style="grid-template-columns:repeat(2,minmax(0,1fr))">
-        <div class="s shared"><b>Shared · 5:00</b><span>Teamwork discussion: who did what, what each check found, one catch, one disagreement and how it was resolved (section 04)</span></div>
-        <div class="s shared"><b>Shared · 3:00</b><span>Oversight discussion: the six structural gaps with their true counts, and the duty check a person still runs (section 05)</span></div>
-      </div>
-      <p class="xs" style="margin-top:10px">Counting note. The 31 confirmed and 13 cannot-check totals are the <b>earlier snapshot of 25–26 October</b>, taken before Tuesday's runs. At that point the four dashboards together showed 67 confirmed metric entries and 13 “cannot check” verdicts. The three watchlist companies appear on all four dashboards, so those are not independent observations: the distinct figures are 12 for the watchlist plus 32 for eight radar picks, of which 31 were confirmed, 13 could not be checked yet, and none mismatched. Tuesday's rechecks (four cannot check on each of three dashboards) and Chenxi's 12:20 PM recovery run (three checked, 12 cannot check) are reported in section 03 and are not folded into these totals.</p>
+      <p class="xs" style="margin-top:10px">Counting note. The 31 confirmed and 13 cannot-check totals are the <b>earlier snapshot of 25–26 October</b>, taken before Tuesday's runs. At that point the four dashboards together showed 67 confirmed metric entries and 13 “cannot check” verdicts. The three watchlist companies appear on all four dashboards, so those are not independent observations: the distinct figures are 12 for the watchlist plus 32 for eight radar picks, of which 31 were confirmed, 13 could not be checked yet, and none mismatched. Tuesday's rechecks (four cannot check on each of three dashboards) Chenxi's 12:20 PM recovery run (three checked, 12 cannot check) and Jo's 11:15 PM run (two checked: 3 confirmed, 5 cannot check) are reported in section 04 and are not folded into these totals.</p>
     </section>
 
-    <!-- 02 DEMO -->
-    <section class="block" id="demo">
-      <p class="eyebrow">02 · Demonstration · 6 minutes</p>
-      <h2>What the watcher produced on Jo's dashboard</h2>
-      <p class="lede">Live page: <a href="https://ywanwah-earnings-extractor-assessor.vercel.app/" target="_blank" rel="noopener">ywanwah-earnings-extractor-assessor.vercel.app</a>. Everything below is copied from that page's data files; nothing is re-typed.</p>
+    <!-- 02 WORKFLOW -->
+    <section class="block" id="tool" data-seg="2">
+      <div class="segrow"><span class="segtag s2">Segment 2 of 5 · 3 min</span><span class="segdesc">Explain the workflow: SEC fetch → watcher → assessor → human review</span></div>
+      <p class="eyebrow">02 · Workflow</p>
+      <h2>SEC fetch, watcher, assessor, human review</h2>
+      <p class="lede">Four steps every morning, Singapore time. GitHub asks the SEC before dawn and keeps the answers; the watcher reads them at 6:07; the assessor checks the watcher at 6:37; a person reads both before the 8:30 meeting. Click a layer of the stack for what it does.</p>
+      <div class="show four" style="margin-bottom:6px">
+        <div class="s"><b class="big">1 · SEC fetch · 5:10 AM</b><span>A GitHub workflow asks EDGAR for the full-text search (8-K item 2.02), the three watchlist filing lists and the XBRL company facts, and commits the answers to sec_cache/. Claude's cloud cannot reach sec.gov, so this is the only door.</span></div>
+        <div class="s"><b class="big">2 · Watcher · 6:07 AM</b><span>Reads the cache, lists who reported since the last run, draws two random filers, reads each new press release and writes four figures with quotes, guidance, claims and tone. Writes the watch brief.</span></div>
+        <div class="s"><b class="big">3 · Assessor · 6:37 AM</b><span>Checks every quote against the release and every figure against the 10-Q through XBRL (0.5%, EPS to the cent), judges the claims and the tone, rates S1 Correct, S2 Complete, S3 Useful. Writes the assess brief.</span></div>
+        <div class="s"><b class="big">4 · Human review · 7:15 AM</b><span>The duty analyst reads the sources line, the run log and every verdict on the static page, and opens the release for any figure that will be used in the meeting. The only step that can see what is missing.</span></div>
+      </div>
+      <div class="stage"><div class="in">
+        <div class="iso-wrap">
+          <div class="iso" id="iso"><div class="stack" id="stack"></div></div>
+          <div class="iso-detail" id="isoDetail"></div>
+        </div>
+      </div></div>
+      <div class="grid3">
+        <div class="card tint"><h3>Schedule</h3><p class="small">Watcher 6:07 AM, assessor 6:37 AM, Singapore time, daily. That is 6:07 PM in New York under daylight time and 5:07 PM once US clocks change on 1 November.</p></div>
+        <div class="card tint"><h3>Rules of the check</h3><p class="small">A figure is confirmed when the quote holds it and the 10-Q value is within 0.5%; EPS must match to the cent. A card is re-checked each morning only while its 10-Q is missing: for 10 days after the release or 50 days after quarter end, whichever is later. Once the 10-Q is found, a “cannot check” stays as it is.</p></div>
+        <div class="card tint"><h3>Sources</h3><p class="small">EDGAR full-text search (8-K item 2.02), the submissions API for the watchlist, the companyfacts XBRL API for filed values. No other data source, no connectors, nothing sent. The prompt, rule and settings files are in <a href="#files">section 08</a>.</p></div>
+      </div>
+    </section>
 
-      <h3 style="margin-top:18px">The reporting window</h3>
+    <!-- 03 DEMO -->
+    <section class="block" id="demo" data-split data-seg="3">
+      <div class="segrow"><span class="segtag s3">Segment 3 of 5 · 7 min</span><span class="segdesc">Demonstrate your dashboard and perform the required live SEC source check</span></div>
+      <p class="eyebrow">03 · Demonstration</p>
+      <h2>What the watcher produced on Jo's dashboard</h2>
+      <p class="lede">Live page: <a href="https://ywanwah-earnings-extractor-assessor.vercel.app/" target="_blank" rel="noopener">ywanwah-earnings-extractor-assessor.vercel.app</a>, also at <a href="https://ywanwah.github.io/earnings-extractor-assessor/" target="_blank" rel="noopener">ywanwah.github.io/earnings-extractor-assessor</a>. Everything below is copied from that page's data files; nothing is re-typed.</p>
+
+      <h3>The reporting window</h3>
       <div class="grid4" style="margin-bottom:16px">
         <div class="tile tilt"><div class="n">18–25 Oct</div><div class="l">First window (US dates)</div><div class="s">First run Sun 25 Oct, 11:27 PM Singapore</div></div>
         <div class="tile tilt"><div class="n">404 → 365</div><div class="l">Hits → results filings</div><div class="s">8-K filings with item 2.02, de-duplicated by accession</div></div>
@@ -433,11 +476,11 @@
       <div class="seg" id="cardTabs" role="group" aria-label="Choose the company" style="margin:6px 0 12px"><button type="button" data-k="meta" aria-pressed="true">Meta Platforms · watchlist</button><button type="button" data-k="wcn" aria-pressed="false">Waste Connections · radar pick</button></div>
       <div class="democard" id="democard"></div>
 
-      <h3 style="margin-top:22px">What the assessor checked on this dashboard · snapshot of 26 October</h3>
+      <h3>What the assessor checked on this dashboard · 25 and 27 October</h3>
       <div class="grid3">
-        <div class="tile"><div class="n">19</div><div class="l">Figures confirmed</div><div class="s">Each equals the 10-Q value; EPS to the cent</div></div>
-        <div class="tile"><div class="n">1</div><div class="l">Cannot check</div><div class="s">Waste Connections net income; the 10-Q is filed without that tag, so no recheck is queued</div></div>
-        <div class="tile"><div class="n">0</div><div class="l">Mismatches</div><div class="s">No figure differed from the filing</div></div>
+        <div class="tile"><div class="n">22</div><div class="l">Figures confirmed</div><div class="s">19 on 25 Oct, 3 more on 27 Oct at 11:15 PM; each equals the 10-Q value, EPS to the cent</div></div>
+        <div class="tile"><div class="n">6</div><div class="l">Cannot check</div><div class="s">Waste Connections net income (10-Q filed without the tag); Acumen revenue (none given); Watsco's four until its 10-Q is filed</div></div>
+        <div class="tile"><div class="n">0</div><div class="l">Mismatches</div><div class="s">No figure differed from a filing</div></div>
       </div>
       <div class="tablewrap" style="margin-top:14px"><table><thead><tr><th>Company</th><th>Figures</th><th>Claims judged</th><th>Tone verdict</th><th class="num">S1 Correct</th><th class="num">S2 Complete</th><th class="num">S3 Useful</th></tr></thead><tbody>
         <tr><td>Alphabet</td><td>4 confirmed</td><td>2 match, 1 cannot check</td><td>positive · supported</td><td class="num">5</td><td class="num">5</td><td class="num">5</td></tr>
@@ -445,8 +488,10 @@
         <tr><td>Meta Platforms</td><td>4 confirmed</td><td>3 match, 1 does not match</td><td>balanced · supported</td><td class="num">5</td><td class="num">5</td><td class="num">5</td></tr>
         <tr><td>Waste Connections</td><td>3 confirmed, 1 cannot check</td><td>3 match, 1 cannot check</td><td>positive · supported</td><td class="num">5</td><td class="num">5</td><td class="num">4</td></tr>
         <tr><td>Iridium</td><td>4 confirmed</td><td>1 match, 1 cannot check</td><td>positive · not supported</td><td class="num">5</td><td class="num">5</td><td class="num">5</td></tr>
+        <tr><td>Acumen Pharmaceuticals <span class="xs">· added 27 Oct, 11:15 PM</span></td><td>3 confirmed, 1 cannot check (no revenue: clinical-stage)</td><td>3 cannot check</td><td>positive · supported</td><td class="num">5</td><td class="num">5</td><td class="num">5</td></tr>
+        <tr><td>Watsco <span class="xs">· added 27 Oct, 11:15 PM</span></td><td>4 cannot check (no 10-Q yet; every quote holds its number)</td><td>3 match, 1 does not match</td><td>positive · not supported</td><td class="num">5</td><td class="num">5</td><td class="num">4</td></tr>
       </tbody></table></div>
-      <h3 style="margin-top:22px">A timed live check against sec.gov</h3>
+      <h3>A timed live check against sec.gov</h3>
       <div class="card copper" id="livecheck">
         <div class="chips" style="margin-bottom:10px"><span class="pill human"><i></i>Checked by hand, Jo</span><span class="pill neutral"><i></i>Tue 27 Oct 2026 · 1:29 PM Singapore · 1:29 AM New York</span><span class="pill met"><i></i>Matches the watcher's figure, unit and period</span></div>
         <div class="grid2">
@@ -470,18 +515,21 @@
       </div>
     </section>
 
-    <!-- 03 TUESDAY -->
-    <section class="block" id="tuesday">
-      <p class="eyebrow">03 · Tuesday 27 October</p>
-      <h2>All four scheduled morning runs failed; Chenxi later recovered</h2>
-      <div class="chips" style="margin-bottom:12px"><span class="pill not"><i></i>Watchers: 0 of 4 SEC answers on all four dashboards</span><span class="pill part"><i></i>Assessors: Jo's checked nothing; the other three rechecked one card each</span><span class="pill met"><i></i>Chenxi's 12:16:58 PM re-run: 8 of 8, 64 results filings</span><span class="pill neutral"><i></i>S5 Reliable: 2 from all four of us</span></div>
-      <p class="lede">Tuesday's 6:07 run was the first scheduled run that could read companies which reported on Monday 26 October in the US. On all four dashboards the watcher read none of them: “Read 0 of 4 SEC answers at 6:09 AM Singapore time.” The assessors did not all behave alike. Jo's checked zero extractions and reported “Nothing to assess today: every extraction has already been checked.” Haojia's, Chenxi's and Shan's each attempted one recheck and returned four “cannot check” verdicts, having no SEC answers to check against. At 12:16:58 PM Chenxi re-ran the watcher by hand: it read 8 of 8 sources, found 64 results filings and saved two new extractions, and the 12:20 PM assessor checked three.</p>
+    <!-- 04 TUESDAY -->
+    <section class="block" id="tuesday" data-split data-seg="3">
+      <div class="segrow"><span class="segtag s3">Segment 3 of 5 · 7 min · continued</span><span class="segdesc">Demonstrate your dashboard and perform the required live SEC source check. Tuesday's run is the last part of the demonstration</span></div>
+      <p class="eyebrow">04 · Tuesday 27 October</p>
+      <h2>All four scheduled morning runs failed; Chenxi recovered at midday, Jo at 11 PM</h2>
+      <div class="chips" style="margin-bottom:12px"><span class="pill not"><i></i>Watchers: 0 of 4 SEC answers on all four dashboards</span><span class="pill part"><i></i>Assessors: Jo's checked nothing; the other three rechecked one card each</span><span class="pill met"><i></i>Chenxi's 12:16:58 PM re-run: 8 of 8, 64 results filings</span><span class="pill met"><i></i>Jo's 11:11 PM re-run: 10 of 10, 136 results filings</span><span class="pill neutral"><i></i>S5 Reliable: 2 from all four of us</span></div>
+      <p class="lede">Tuesday's 6:07 run was the first scheduled run that could read companies which reported on Monday 26 October in the US. On all four dashboards the watcher read none of them: “Read 0 of 4 SEC answers at 6:09 AM Singapore time.” The assessors did not all behave alike. Jo's checked zero extractions and reported “Nothing to assess today: every extraction has already been checked.” Haojia's, Chenxi's and Shan's each attempted one recheck and returned four “cannot check” verdicts, having no SEC answers to check against. At 12:16:58 PM Chenxi re-ran the watcher by hand: it read 8 of 8 sources, found 64 results filings and saved two new extractions, and the 12:20 PM assessor checked three. At 11:08 PM Jo ran the SEC fetch by hand and then both routines: the 11:11 PM watcher read 10 of 10 sources, found 136 results filings for 25–27 October (64 dated Monday, 72 dated Tuesday) and saved Acumen Pharmaceuticals and Watsco; the 11:15 PM assessor checked both, 3 figures confirmed, 5 cannot check. Both recoveries were by hand, and both came after the 8:30 meeting.</p>
+      <h3>What each dashboard did</h3>
       <div class="tablewrap team" style="margin-bottom:16px"><table class="small"><thead><tr><th style="width:90px">Dashboard</th><th>Watcher · 6:07 AM run</th><th>Assessor · 6:37 AM run</th><th>Later on Tuesday</th></tr></thead><tbody>
-        <tr><td><b>Jo</b></td><td>0 of 4 SEC answers at 6:09. The cache was 23 hours old, past the 20-hour limit, and was not used; efts.sec.gov and data.sec.gov refused the routine's direct requests (403). Radar: no count. Alphabet, Amazon, Meta: could not be checked. 0 new.</td><td><b>0 checked, 0 rechecks.</b> “Nothing to assess today: every extraction has already been checked.” Every card on this dashboard already has its 10-Q found, and the tool only re-checks a card while its 10-Q is missing, so nothing was queued.</td><td>No re-run. The GitHub fetch landed at 8:23 and 8:49 AM, 13 of 13 answers, with 64 Monday filers in the cache that no run has read.</td></tr>
+        <tr><td><b>Jo</b></td><td>0 of 4 SEC answers at 6:09. The cache was 23 hours old, past the 20-hour limit, and was not used; efts.sec.gov and data.sec.gov refused the routine's direct requests (403). Radar: no count. Alphabet, Amazon, Meta: could not be checked. 0 new.</td><td><b>0 checked, 0 rechecks.</b> “Nothing to assess today: every extraction has already been checked.” Every card on this dashboard already has its 10-Q found, and the tool only re-checks a card while its 10-Q is missing, so nothing was queued.</td><td class="day">The GitHub fetch landed at 8:23 and 8:49 AM (13 of 13) with 64 Monday filers that no run read. <b>11:08 PM fetch, run by hand:</b> 15 of 15 answers, window widened to 25–27 Oct. <b>11:11 PM watcher:</b> 10 of 10 SEC answers; 149 hits, 136 results filings (64 Monday, 72 Tuesday: Boeing, Coca-Cola, PayPal, S&amp;P Global, Sherwin-Williams, HCA, Hilton, Corning among them); watchlist no new results; saved <b>Acumen Pharmaceuticals</b> and <b>Watsco</b>. <b>11:15 PM assessor:</b> 2 checked, 3 confirmed, 0 mismatches, 5 cannot check (Acumen 5 · 5 · 5, Watsco 5 · 5 · 4). The re-run's briefs overwrote the 6:09 and 6:38 briefs.</td></tr>
         <tr><td><b>Haojia</b></td><td>0 of 4 SEC answers at 6:09; same cause.</td><td><b>1 recheck: Maximus.</b> Four “cannot check”; S1 5 · S2 5 · S3 3. Sources: “0 of 1 SEC answers at 6:38.”</td><td>No re-run recorded.</td></tr>
         <tr><td><b>Chenxi</b></td><td>0 of 4 SEC answers at 6:09; same cause.</td><td><b>1 recheck: First Hawaiian.</b> Four “cannot check”; S1 5 · S2 4 · S3 3.</td><td class="day"><b>12:16:58 PM watcher, run by hand:</b> 8 of 8 SEC answers; 69 hits, 64 results filings dated Monday; watchlist no new results; saved <b>Xencor Inc</b> and <b>OpenWorld, Inc.</b> as the day's picks. <b>12:20:00 PM assessor:</b> 3 checked, 12 “cannot check” (First Hawaiian 5 · 5 · 4, Xencor 5 · 5 · 4, OpenWorld 5 · 4 · 3); the 10-Qs for the two picks are not yet filed.</td></tr>
         <tr><td><b>Shan</b></td><td>0 of 4 SEC answers at 6:09; same cause.</td><td><b>1 recheck: BancFirst.</b> Four “cannot check”; S1 5 · S2 5 · S3 4.</td><td>No re-run recorded.</td></tr>
       </tbody></table></div>
+      <h3>The sequence, and what the morning runs missed</h3>
       <div class="grid2">
         <div class="card">
           <h4>The sequence, from the run records</h4>
@@ -492,135 +540,97 @@
             <tr><td class="mono" style="white-space:nowrap">Tue 8:23 · 8:49 AM</td><td>GitHub fetch ran on Jo's repository, 13 of 13 answers: three hours after its schedule and two hours after the agents.</td></tr>
             <tr><td class="mono" style="white-space:nowrap">Tue 12:16:58 PM</td><td>Chenxi's watcher, run by hand after the fetch had landed: 8 of 8 SEC answers, 64 results filings, two saved.</td></tr>
             <tr><td class="mono" style="white-space:nowrap">Tue 12:20:00 PM</td><td>Chenxi's assessor: 3 checked, 12 “cannot check”.</td></tr>
-            <tr><td class="mono" style="white-space:nowrap">Tue 1:29 PM</td><td>Jo's timed live check of Meta's revenue on sec.gov (<a href="#livecheck">section 02</a>): USD 64,601 million, three months ended 30 September 2026, confirmed.</td></tr>
+            <tr><td class="mono" style="white-space:nowrap">Tue 1:29 PM</td><td>Jo's timed live check of Meta's revenue on sec.gov (<a href="#livecheck">section 03</a>): USD 64,601 million, three months ended 30 September 2026, confirmed.</td></tr>
+            <tr><td class="mono" style="white-space:nowrap">Tue 11:08 PM</td><td>Jo's SEC fetch, run by hand from the Actions tab: 15 of 15 answers, window 25–27 Oct; it drew Acumen Pharmaceuticals and Watsco and downloaded their releases.</td></tr>
+            <tr><td class="mono" style="white-space:nowrap">Tue 11:11 PM</td><td>Jo's watcher, run by hand: 10 of 10 SEC answers, 149 hits, 136 results filings, two saved. Its brief replaced the 6:09 brief, because briefs are keyed by date.</td></tr>
+            <tr><td class="mono" style="white-space:nowrap">Tue 11:15 PM</td><td>Jo's assessor: 2 checked, 3 confirmed, 0 mismatches, 5 cannot check; Watsco's “long-range objectives remain fully intact” ruled not matching the margin trend, and its positive tone not supported.</td></tr>
           </tbody></table>
-          <p class="xs" style="margin:8px 0 0">Sources: <a href="https://ywanwah-earnings-extractor-assessor.vercel.app/#brief=2026-10-27-watch" target="_blank" rel="noopener">Jo's watch brief</a> and <a href="https://ywanwah-earnings-extractor-assessor.vercel.app/#brief=2026-10-27-assess" target="_blank" rel="noopener">assess brief</a>; the 27 October briefs and data/runs.json on <a href="https://jaylo-dang.github.io/earnings-extractor-assessor/" target="_blank" rel="noopener">Haojia's</a>, <a href="https://annakiwi.github.io/earnings-extractor-assessor/" target="_blank" rel="noopener">Chenxi's</a> and <a href="https://shan2855.github.io/earnings-extractor-assessor/" target="_blank" rel="noopener">Shan's</a> dashboards; the repository commit log (sec-fetch commits carry their run time).</p>
+          <p class="xs" style="margin:8px 0 0">Sources: <a href="https://ywanwah-earnings-extractor-assessor.vercel.app/#brief=2026-10-27-watch" target="_blank" rel="noopener">Jo's watch brief</a> and <a href="https://ywanwah-earnings-extractor-assessor.vercel.app/#brief=2026-10-27-assess" target="_blank" rel="noopener">assess brief</a> (now the 11 PM versions; the 6:09 “0 of 4” brief survives in data/runs.json and in commit e7e3cad of the repository, and the dashboard is also at <a href="https://ywanwah.github.io/earnings-extractor-assessor/" target="_blank" rel="noopener">ywanwah.github.io</a>); the 27 October briefs and data/runs.json on <a href="https://jaylo-dang.github.io/earnings-extractor-assessor/" target="_blank" rel="noopener">Haojia's</a>, <a href="https://annakiwi.github.io/earnings-extractor-assessor/" target="_blank" rel="noopener">Chenxi's</a> and <a href="https://shan2855.github.io/earnings-extractor-assessor/" target="_blank" rel="noopener">Shan's</a> dashboards; the repository commit log (sec-fetch commits carry their run time).</p>
         </div>
         <div class="card copper">
-          <h4>What the 8:49 fetch found, and the morning watchers never saw</h4>
+          <h4>What the fetches found, and the morning watchers never saw</h4>
           <p class="small"><b>64 companies filed results dated Monday 26 October</b> (69 full-text hits, de-duplicated and filtered to item 2.02). Among them: Verizon, Whirlpool, Welltower, Cadence Design Systems, Nucor, Hartford Insurance, Principal Financial, Brown &amp; Brown, Public Storage, Alexandria Real Estate, Sun Communities, JetBlue, Amkor, Celestica, Rambus, Jazz Pharmaceuticals, Noble, Bank of Hawaii, Cincinnati Financial, Simpson Manufacturing and PriceSmart.</p>
-          <p class="small">Jo's fetch pre-selected <b>Kforce (KFRC)</b> and <b>Bank of Marin Bancorp (BMRC)</b> as the day's random picks and downloaded their releases into the cache, where they sit unread. Chenxi's midday re-run read the same window, found the same 64 results filings, and drew <b>Xencor</b> and <b>OpenWorld</b>.</p>
+          <p class="small">Jo's 8:49 AM fetch pre-selected <b>Kforce (KFRC)</b> and <b>Bank of Marin Bancorp (BMRC)</b> as the day's random picks and downloaded their releases; no run ever read them. Chenxi's midday re-run read the same window, found the same 64 results filings, and drew <b>Xencor</b> and <b>OpenWorld</b>.</p>
+          <p class="small">Jo's <b>11:08 PM fetch, run by hand</b>, widened the window to 25–27 October: 149 hits, <b>136 results filings</b>, the 64 Monday filers plus 72 dated Tuesday, among them Boeing, Coca-Cola, PayPal, S&amp;P Global, Sherwin-Williams, HCA Healthcare, Hilton, Corning, Ecolab, Freeport-McMoRan, PACCAR, Illinois Tool Works, American Tower and Centene. It drew <b>Acumen Pharmaceuticals (ABOS)</b>, filed Monday, and <b>Watsco (WSO)</b>, filed Tuesday, and the 11:11 PM watcher saved both.</p>
           <p class="small" style="margin:0"><b>Watchlist: all older.</b> Alphabet (Q2, filed 22 Jul), Amazon (Q2, filed 30 Jul) and Meta (Q3, filed 21 Oct) had no new results on Monday, which is what Chenxi's re-run reported and what the other three would have reported had they read the cache.</p>
         </div>
       </div>
-      <div class="grid3" style="margin-top:14px">
+      <h3>Why it happened, and what would fix it</h3>
+      <div class="grid3">
         <div class="card tint"><h4>Why it happened</h4><p class="small" style="margin:0">Three things lined up. GitHub's scheduled workflow fires late under load, two to three hours on both mornings. The 20-hour cache limit then rejects the previous morning's answers by the next 6:07. And the routine's own network is blocked from sec.gov, so there is no direct fallback. On Sunday this cost nothing; on the first weekday it cost the whole morning on every dashboard.</p></div>
         <div class="card tint"><h4>Why the assessors differed</h4><p class="small" style="margin:0">The tool re-checks a card only while its 10-Q is missing (<code>recheck_due</code> in tools/earnings.py). Jo's five cards all have their 10-Q found, so the assessor had nothing queued and wrote “nothing to assess”, which reads as a clean morning. Haojia's Maximus, Chenxi's First Hawaiian and Shan's BancFirst have no matching 10-Q on file yet, so a recheck was due; with no SEC answers each came back as four “cannot check”, and their briefs say so. All four of us rated S5 Reliable at 2: on schedule, honest run records, nothing read.</p></div>
-        <div class="card tint"><h4>What would fix it, and what would not</h4><p class="small" style="margin:0">Give the fetch several early slots (for example 3:40, 4:10, 4:40 and 5:10 AM) so one lands before 6:07 despite the delay, and make the assessor say “the watcher read nothing” instead of “nothing to assess”. Raising the cache limit to 26 hours would only let the previous morning's answers through; it would not make them contain Monday's earnings, which were filed after that fetch. The morning brief is current only when the sources line cites a fetch made after EDGAR's 5:30 PM New York cutoff for the previous US business day (5:30 AM Singapore now, 6:30 AM from 1 November, which is after the 6:07 watcher). Chenxi's hand re-run after the fetch landed is the working fallback until then.</p></div>
+        <div class="card tint"><h4>What would fix it, and what would not</h4><p class="small" style="margin:0">Give the fetch several early slots (for example 3:40, 4:10, 4:40 and 5:10 AM) so one lands before 6:07 despite the delay, and make the assessor say “the watcher read nothing” instead of “nothing to assess”. Raising the cache limit to 26 hours would only let the previous morning's answers through; it would not make them contain Monday's earnings, which were filed after that fetch. The morning brief is current only when the sources line cites a fetch made after EDGAR's 5:30 PM New York cutoff for the previous US business day (5:30 AM Singapore now, 6:30 AM from 1 November, which is after the 6:07 watcher). The hand re-runs after a fetch landed, Chenxi's at 12:17 PM and Jo's at 11:11 PM, are the working fallback until then; both came after the 8:30 meeting, so Tuesday's meeting still had no brief.</p></div>
       </div>
     </section>
 
-    <!-- 04 TEAM -->
-    <section class="block" id="team">
-      <p class="eyebrow">04 · Team experience · shared 5-minute discussion</p>
+    <!-- 05 TEAM -->
+    <section class="block" id="team" data-split data-seg="4">
+      <div class="segrow"><span class="segtag s4">Segment 4 of 5 · 4 min</span><span class="segdesc">Explain team roles and show one catch and one disagreement from R2/R3, including how you resolved them</span></div>
+      <p class="eyebrow">05 · Team</p>
       <h2>Who did what, and what each check found</h2>
       <p class="lede">Each member built and ran their own copy of the watcher and assessor; the four dashboards share a template and a watchlist and differ in their random picks. The rows below are final and are written into this file, so they travel with it. After Tuesday's run all four of us rated S5 Reliable at 2 on the same evidence: on schedule, honest run records, nothing read at 6:07.</p>
+      <h3>Who did what</h3>
       <div class="tablewrap team" style="margin-bottom:18px"><table id="teamTable"><thead><tr><th style="width:100px">Member</th><th>Work completed</th><th>What their check found</th><th>Tuesday 27 October</th></tr></thead><tbody>
-        <tr><td><b>Jo</b></td><td>Built and ran Jo's dashboard (runs 25–27 Oct); reviewed all four dashboards line by line against the filings on sec.gov and the XBRL API; ran the timed live check of Meta's revenue; drafted the form answers, the slide deck and this page.</td><td>Amazon's Q3 operating-income guide ($22.5–26.5bn) missing while Complete scored 5/5; the Sunday brief overwritten by an 11:41 PM re-run; Waste Connections net income can never confirm under the current XBRL tag; every 6:07 run read a cache filled the previous evening.</td><td class="day">Watcher 0 of 4 SEC answers. Assessor 0 checked, 0 rechecks: “nothing to assess”. No re-run. Fetch landed at 8:23 and 8:49 AM with 64 Monday filers unread.</td></tr>
+        <tr><td><b>Jo</b></td><td>Built and ran Jo's dashboard (runs 25–27 Oct); reviewed all four dashboards line by line against the filings on sec.gov and the XBRL API; ran the timed live check of Meta's revenue; drafted the form answers, the slide deck and this page.</td><td>Amazon's Q3 operating-income guide ($22.5–26.5bn) missing while Complete scored 5/5; the Sunday brief overwritten by an 11:41 PM re-run; Waste Connections net income can never confirm under the current XBRL tag; every 6:07 run read a cache filled the previous evening.</td><td class="day">Watcher 0 of 4 SEC answers. Assessor 0 checked, 0 rechecks: “nothing to assess”. Fetch landed at 8:23 and 8:49 AM with 64 Monday filers unread. <b>11:08 PM:</b> ran the fetch by hand (15 of 15); <b>11:11 PM watcher</b> 10 of 10, 136 results filings, Acumen Pharmaceuticals and Watsco saved; <b>11:15 PM assessor</b> 2 checked, 3 confirmed, 5 cannot check.</td></tr>
         <tr><td><b>Haojia</b></td><td>Built and ran Haojia's dashboard, jaylo-dang (runs 25–27 Oct); random picks Maximus and General Motors.</td><td>Review of this dashboard found the Maximus 8-K was an acquisition announcement rated 5 / 5 / 4 with nothing extracted, and GM's guidance quote carried no number while the $14.5–15.5bn range sat in a table.</td><td class="day">Watcher 0 of 4 SEC answers. Assessor rechecked Maximus: four “cannot check”, S1 5 · S2 5 · S3 3, “0 of 1 SEC answers at 6:38”. No re-run recorded.</td></tr>
         <tr><td><b>Chenxi</b></td><td>Built and ran Chenxi's dashboard, annakiwi (runs 25–27 Oct); random picks First Hawaiian and XTI Aerospace; its briefs carry the “check by hand” list. The only member to re-run the watcher by hand on Tuesday, after the GitHub fetch had landed.</td><td>Review of this dashboard found First Hawaiian's revenue left blank although NII $174.1m and noninterest income $56.1m are in the release, and scores that moved on a recheck with nothing new filed.</td><td class="day">Watcher 0 of 4 at 6:09. Assessor rechecked First Hawaiian: four “cannot check”, S1 5 · S2 4 · S3 3. <b>12:16:58 PM re-run:</b> 8 of 8 SEC answers, 64 results filings, Xencor and OpenWorld saved. <b>12:20 PM assessor:</b> 3 checked, 12 “cannot check”.</td></tr>
         <tr><td><b>Shan</b></td><td>Built and ran Shan's dashboard, shan2855 (runs 25–27 Oct); random picks BancFirst and Comfort Systems; single-column quotes and the right Meta tone.</td><td>Review of this dashboard found BancFirst's revenue blank and Comfort Systems' backlog ($17.81bn, up from $9.38bn) and >$1bn cash flow not captured.</td><td class="day">Watcher 0 of 4 SEC answers. Assessor rechecked BancFirst: four “cannot check”, S1 5 · S2 5 · S3 4. No re-run recorded.</td></tr>
       </tbody></table></div>
+      <h3>The catch (R2) and the disagreement (R3), as in the reflection</h3>
       <div class="grid2">
-        <div class="card copper"><h4>One named catch</h4><h3>Amazon's operating-income guidance was missing, and the assessor scored Complete 5/5</h3><p class="small">Jo, 26 October, reading exhibit 99.1 of accession 0001018724-26-000024. The release's outlook section guides Q3 net sales ($197.0–202.0bn) and Q3 operating income ($22.5–26.5bn) and flags an unfavourable FX impact of about 80 basis points. The watcher recorded net sales only; the assessor rated S2 Complete at 5 because what was there was quoted word for word. The same pattern appears on all four dashboards.</p></div>
-        <div class="card"><h4>One disagreement and its resolution</h4><h3>Jo versus the assessor on Amazon's S2</h3><p class="small">The assessor gave 5; Jo gave 3. Resolved by going back to the release: the guided figure exists and is absent from the brief, so the form carries S2 = 3 and the proposed change to the assessor is to re-read the outlook section before scoring Complete. A second, cross-dashboard disagreement: two watchers labelled Meta's tone positive and two balanced; the assessors that saw “positive” ruled it not supported, since reported operating income fell 36.8% after a $9.89bn legal charge, so balanced stands.</p></div>
+        <div class="card copper"><h4>R2 · The catch</h4><h3>Chenxi's check found the empty morning the agents had reported quietly</h3><p class="small">Tuesday 27 October. All four watchers read 0 of 4 SEC answers at 6:09; Jo's assessor wrote “nothing to assess”, which reads like a clean morning, and Jo took it as one; Jo re-ran her own only at 11 PM, long after the meeting. Chenxi saw at once that the run had read nothing, waited for the fetch to land, and re-ran the watcher by hand at 12:16:58 PM: 8 of 8 SEC answers, 64 Monday filers, two new extractions; her 12:20 PM assessor checked three. The catch: the tool fails politely, and only a person reading the sources line sees it.</p></div>
+        <div class="card"><h4>R3 · The disagreement and its resolution</h4><h3>Jo versus the assessor on Amazon's S2 Complete</h3><p class="small">The assessor gave 5; Jo gave 3. Jo, 26 October, reading exhibit 99.1 of accession 0001018724-26-000024: the outlook section guides Q3 net sales ($197.0–202.0bn) and Q3 operating income ($22.5–26.5bn) and flags an FX drag of about 80 basis points; the watcher recorded net sales only, and the assessor rated Complete 5 because what was there was quoted word for word. Resolved by going back to the release: the guided figure exists and is absent from the brief, so the form carries S2 = 3 and the proposed change is that the assessor re-reads the outlook section before scoring Complete. The same gap is on all four dashboards. The team agreed with Jo, because the source shows it. We also disagreed on Meta's tone. Two watchers said “positive” and two said “balanced”. We chose “balanced”, because Meta's operating income fell 36.8 per cent after a large legal charge.</p></div>
       </div>
     </section>
 
-    <!-- 05 OVERSIGHT -->
-    <section class="block" id="oversight">
-      <p class="eyebrow">05 · Oversight · shared 3-minute discussion</p>
-      <h2>Six structural gaps, with their true counts</h2>
+    <!-- 06 OVERSIGHT -->
+    <section class="block" id="oversight" data-split data-seg="5">
+      <div class="segrow"><span class="segtag s5">Segment 5 of 5 · 4 min</span><span class="segdesc">Explain ongoing human oversight: who checks, what they check, when, and your first proposed improvement</span></div>
+      <p class="eyebrow">06 · Oversight</p>
+      <h2>Six structural gaps, the duty check, and the first improvement</h2>
       <p class="lede">Three appear on all four dashboards, one on three, two on two. Drag the cube or use the buttons; the panel names the dashboards affected and the evidence.</p>
+      <h3>The six gaps</h3>
       <div class="stage"><div class="in">
         <div class="cube-wrap">
           <div class="cube-stage" id="cubeStage"><div class="cube" id="cube"></div></div>
           <div class="cube-detail" id="cubeDetail"><div class="cube-nav" id="cubeNav"></div></div>
         </div>
       </div></div>
+      <h3>Who checks, what they check, and when</h3>
+      <div class="show" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:14px">
+        <div class="s"><b class="big">Who</b><span>The duty analyst, one group member on rotation, before any figure reaches a meeting note. Compliance screens the briefs once a week.</span></div>
+        <div class="s"><b class="big">What</b><span>The sources line and its fetch time, both timeline dots, every mismatch and cannot-check verdict, the outlook section for each watchlist name used, bank labels, and any buy, sell or sizing language.</span></div>
+        <div class="s"><b class="big">When</b><span>7:15 AM Singapore, after the 6:37 assessor and before the 8:30 meeting; the weekly language screen on Fridays. The checklist below is ticked each morning.</span></div>
+      </div>
       <div class="grid2">
         <div class="card"><h4>The duty check a person still runs, 7:15 AM</h4><ul class="checks" id="dutyChecks"></ul><div style="margin-top:10px"><button class="btn sm ghost" id="dutyReset" type="button">Reset for tomorrow</button></div></div>
         <div class="card"><h4>What the agents are good at, and blind to</h4><p class="small">Good at: every confirmed figure in the 25–26 October snapshot (31 distinct) equals the 10-Q to the last digit, and Meta's revenue held up to a timed live check on Tuesday; units in thousands are converted; “cannot check” is used rather than guessed; the assessor overruled two tone calls and flagged Meta's “investments are paying off” on all four dashboards.</p><p class="small" style="margin:0">Blind to: what is absent. A second guidance line, a bank's revenue components, a filing that was never an earnings release, a cache filled the previous evening, a morning with no SEC answers at all. The assessor rates the watcher's output, not the world, so a person reads the outlook section and the sources line before a figure is used.</p></div>
       </div>
-    </section>
-
-    <div class="backup-band"><b>Backup material · not presented</b><span class="small sec2">Sections 06 to 11 hold the detail behind the numbers above: how the pipeline runs, the requirement-by-requirement scoring, the risk register, the proposed operating controls, the evidence ledger and the T1–T8 responses, and the prompt, rule, settings and fetch files the routines actually run from.</span></div>
-
-    <!-- 06 TOOL -->
-    <section class="block backup" id="tool">
-      <p class="eyebrow">06 · Backup · How the tool works</p>
-      <h2>Six layers between EDGAR and the analyst</h2>
-      <div class="stage"><div class="in">
-        <div class="iso-wrap">
-          <div class="iso" id="iso"><div class="stack" id="stack"></div></div>
-          <div class="iso-detail" id="isoDetail"></div>
-        </div>
-      </div></div>
-      <div class="grid3">
-        <div class="card tint"><h3>Schedule</h3><p class="small">Watcher 6:07 AM, assessor 6:37 AM, Singapore time, daily. That is 6:07 PM in New York under daylight time and 5:07 PM once US clocks change on 1 November.</p></div>
-        <div class="card tint"><h3>Rules of the check</h3><p class="small">A figure is confirmed when the quote holds it and the 10-Q value is within 0.5%; EPS must match to the cent. A card is re-checked each morning only while its 10-Q is missing: for 10 days after the release or 50 days after quarter end, whichever is later. Once the 10-Q is found, a “cannot check” stays as it is.</p></div>
-        <div class="card tint"><h3>Sources</h3><p class="small">EDGAR full-text search (8-K item 2.02), the submissions API for the watchlist, the companyfacts XBRL API for filed values. No other data source, no connectors, nothing sent.</p></div>
-      </div>
-    </section>
-
-    <!-- 07 REQUIREMENTS -->
-    <section class="block backup" id="requirements">
-      <p class="eyebrow">07 · Backup · Requirements</p>
-      <h2>Eighteen requirements, scored from the 26–27 October review</h2>
-      <div class="req-tools">
-        <div class="seg" id="reqFilter" role="group" aria-label="Filter by status"><button type="button" data-f="all" aria-pressed="true">All</button><button type="button" data-f="met" aria-pressed="false">Met</button><button type="button" data-f="part" aria-pressed="false">Partly</button><button type="button" data-f="not" aria-pressed="false">Not met</button></div>
-        <div class="seg" id="reqCat" role="group" aria-label="Filter by area"><button type="button" data-c="all" aria-pressed="true">All areas</button><button type="button" data-c="Coverage" aria-pressed="false">Coverage</button><button type="button" data-c="Extraction" aria-pressed="false">Extraction</button><button type="button" data-c="Verification" aria-pressed="false">Verification</button><button type="button" data-c="Reader" aria-pressed="false">Reader</button><button type="button" data-c="Controls" aria-pressed="false">Controls</button></div>
-        <span class="small muted" id="reqCount"></span>
-      </div>
-      <div class="req" id="reqGrid"></div>
-    </section>
-
-    <!-- 08 RISKS -->
-    <section class="block backup" id="risks">
-      <p class="eyebrow">08 · Backup · Risk register</p>
-      <h2>Nine risks, placed by likelihood and impact</h2>
-      <p class="lede">Click a code for the control and owner. These are the team's proposed controls, not assignment requirements.</p>
-      <div class="risk-wrap">
-        <div class="matrix3d"><div class="mx" id="mx"></div></div>
-        <div class="risk-detail" id="riskDetail"></div>
-      </div>
-    </section>
-
-    <!-- 09 CONTROLS -->
-    <section class="block backup" id="controls">
-      <p class="eyebrow">09 · Backup · Proposed operating controls</p>
-      <h2>What we would put in place if the tool were adopted</h2>
-      <p class="lede">Optional improvements proposed by Group 5. They are not PS6 submission requirements, and nothing here is conditional on them.</p>
+      <h3>The first proposed improvement</h3>
       <div class="grid2">
-        <div>
-          <div class="card"><h3>Operating mode</h3><ol class="small" style="padding-left:20px;margin:8px 0 0;line-height:1.55"><li>Human-in-the-loop through the Q3 reporting season: no figure from the page reaches a meeting note without the 7:15 duty check.</li><li>Seven fixes below, the two plumbing fixes first.</li><li>Analyst-optional mode only after the six gate conditions hold for ten consecutive trading mornings.</li><li>Scope stays at reporting and checking; briefs are screened weekly for buy, sell or sizing language.</li></ol></div>
-          <h3 style="margin-top:18px">Seven fixes</h3>
-          <ul class="checks" id="fixList"></ul>
-        </div>
-        <div>
-          <div class="card">
-            <h3>Readiness gate</h3>
-            <div class="gauge"><svg viewBox="0 0 120 120" id="gauge" aria-label="Readiness gauge"></svg><div><div id="gaugeText" class="small"></div><p class="xs" style="margin-top:8px">Tick a condition when it has held for ten consecutive trading mornings. Remembered in this browser only.</p></div></div>
-            <ul class="cond" id="condList" style="margin-top:14px"></ul>
-          </div>
-          <div class="card tint" style="margin-top:12px"><h4>Bank metrics</h4><p class="small" style="margin:0">Keep the filing's labels. For a bank, show net interest income and noninterest income as filed; if a total revenue line is added it is analyst-calculated (NII plus noninterest income) and labelled so; income before income taxes is a filed label and is not operating income. First Hawaiian: NII $174.1m, noninterest income $56.1m, income before taxes $49.9m. BancFirst: NII $136.0m, noninterest income $51.4m, income before taxes $86.1m.</p></div>
-        </div>
+        <div class="card copper"><h4>Fix the morning's data before anything else</h4><h3>A fetch that covers the previous US business day, landed before 6:07, and a watcher that says when it read nothing</h3><p class="small">Give the SEC fetch several early slots (for example 3:40, 4:10, 4:40 and 5:10 AM Singapore), each made after EDGAR's 5:30 PM New York cutoff for the previous US business day (5:30 AM Singapore now, 6:30 AM from 1 November, which also means moving the 6:07 watcher), so one lands before the watcher despite GitHub's delays. Call the morning brief current only when the sources line cites such a fetch. Have the assessor report “the watcher read nothing” instead of “nothing to assess”.</p><p class="small" style="margin:0"><b>Why this first.</b> Tuesday showed the gap on all four dashboards at once: 0 of 4 SEC answers at 6:09, 64 Monday reporters unread until Chenxi re-ran by hand at 12:16:58 PM and Jo at 11:11 PM, both after the meeting. A longer cache window alone would not fix it: it would admit the previous morning's answers, which do not hold Monday's earnings.</p></div>
+        <div class="card"><h4>How we would know it worked</h4><p class="small">The duty analyst's first check each morning is the sources line. Pass: it names a fetch made after 5:30 AM Singapore (6:30 AM from 1 November) that day, and the watcher's count of results filings is non-zero on a US business day. Fail: any “0 of N SEC answers” line, which is reported as a failed morning, not a quiet one.</p><p class="small">Ten consecutive trading mornings of passes before the duty check is relaxed. Until then the fallback is the one Chenxi and Jo used on Tuesday: press Run workflow on the SEC fetch, then Run now on the watcher and the assessor once it has landed, as the house rules in CLAUDE.md already instruct.</p><p class="small" style="margin:0">The further fixes we would make before a month of mornings (briefs named by run time, every guided item recorded, a pick confirmed as an earnings release, bank lines kept under the filing's labels, scores frozen between rechecks, the column header quoted with the row) are in the reflection, R4.</p></div>
       </div>
     </section>
 
-    <!-- 10 EVIDENCE + T -->
-    <section class="block backup" id="evidence">
-      <p class="eyebrow">10 · Backup · Evidence ledger and T1–T8</p>
+
+    <!-- 07 EVIDENCE + T -->
+    <section class="block" id="evidence" data-split>
+      <div class="segrow"><span class="segtag ref">Reference</span><span class="segdesc">The sources behind segments 3 and 4, and the team's T1–T8 responses</span></div>
+      <p class="eyebrow">07 · Evidence ledger and T1–T8</p>
       <h2>Every source opened, and the team's T1–T8 responses</h2>
+      <h3>Evidence ledger</h3>
       <div class="req-tools">
         <div class="seg" id="ledgerFilter" role="group" aria-label="Filter the ledger"><button type="button" data-f="all" aria-pressed="true">All 13</button><button type="button" data-f="ok" aria-pressed="false">Figures confirmed</button><button type="button" data-f="gap" aria-pressed="false">Found a gap</button></div>
       </div>
       <div class="tablewrap"><table class="ledger" id="ledger"><thead><tr><th>Company</th><th>Filing</th><th>What was checked</th><th>Result</th></tr></thead><tbody></tbody></table></div>
-      <div class="card" style="margin-top:18px"><h3>T1–T8, independent responses of 26 October</h3><p class="small sec2">Each member confirmed these were given before the team discussed them. Not reported in class; kept here for the record. Large number is the member's own answer, small is their guess for the team's average; darker is stronger agreement; red outline marks the lowest team mean.</p><div class="heat" id="heat"></div></div>
+      <h3>T1–T8, independent responses of 26 October</h3>
+      <div class="card"><p class="small sec2">Each member confirmed these were given before the team discussed them; kept here for the record. Large number is the member's own answer, small is their guess for the team's average; darker is stronger agreement; red outline marks the lowest team mean.</p><div class="heat" id="heat"></div></div>
     </section>
-    <!-- 11 FILES -->
-    <section class="block backup" id="files">
-      <p class="eyebrow">11 · Backup · Prompts, rules, settings and the SEC fetch</p>
+    <!-- 08 FILES -->
+    <section class="block" id="files">
+      <div class="segrow"><span class="segtag ref">Reference</span><span class="segdesc">The files behind segment 2: what each routine is given, the rules, the settings and the fetch</span></div>
+      <p class="eyebrow">08 · Prompts, rules, settings and the SEC fetch</p>
       <h2>The files the routines actually run from</h2>
       <p class="lede">Copied verbatim from Jo's repository at commit time on 27 October (the four dashboards share this template). The two prompts are what each routine is given every morning; CLAUDE.md is read first by both; config.json holds the settings; the workflow is the GitHub step that fills the cache.</p>
       <div class="settings">
@@ -1289,6 +1299,7 @@ jobs:
     </section>
   </main>
 </div>
+<div class="pager" id="pager" role="navigation" aria-label="Pages"><button class="btn sm ghost" id="pgPrev" type="button">‹ Previous</button><span class="pg-label" id="pgLabel"></span><span class="pg-count" id="pgCount"></span><button class="btn sm primary" id="pgNext" type="button">Next ›</button></div>
 <footer>MGMT 6110 Problem Set 6 · Group 5 · “Watcher”. Prepared from the four team dashboards, their repositories and the sources named in the ledger, 26–27 October 2026; the 31 confirmed / 13 cannot-check totals are the 25–26 October snapshot. This page reports company results and the checks on them. It is not investment advice.</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -1303,13 +1314,13 @@ jobs:
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   var saved=store.get('ewp-theme',null); if(saved) document.documentElement.setAttribute('data-theme',saved);
-  document.getElementById('themeBtn').addEventListener('click',function(){ var r=document.documentElement,t=r.getAttribute('data-theme'); var dark=t?t==='dark':(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches); r.setAttribute('data-theme',dark?'light':'dark'); store.set('ewp-theme',dark?'light':'dark'); drawGauge(); });
+  document.getElementById('themeBtn').addEventListener('click',function(){ var r=document.documentElement,t=r.getAttribute('data-theme'); var dark=t?t==='dark':(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches); r.setAttribute('data-theme',dark?'light':'dark'); store.set('ewp-theme',dark?'light':'dark'); });
 
   var tip=document.getElementById('tip');
   document.addEventListener('mousemove',function(e){var t=e.target.closest&&e.target.closest('[data-tip]');if(t){tip.innerHTML=t.getAttribute('data-tip');tip.style.left=e.clientX+'px';tip.style.top=e.clientY+'px';tip.classList.add('on');}else tip.classList.remove('on');});
 
   var prog=document.getElementById('progress'); var links=[].slice.call(document.querySelectorAll('#railList a')); var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'));});
-  function onScroll(){ var h=document.documentElement; var p=(h.scrollTop)/(h.scrollHeight-h.clientHeight); prog.style.width=(Math.max(0,Math.min(1,p))*100)+'%'; var y=window.scrollY+140, cur=0; secs.forEach(function(s,i){ if(s&&s.offsetTop<=y) cur=i; }); links.forEach(function(a,i){a.classList.toggle('on',i===cur);}); }
+  function onScroll(){ var h=document.documentElement; var p=paged?(pgIdx+1)/pages.length:(h.scrollTop)/(h.scrollHeight-h.clientHeight); prog.style.width=(Math.max(0,Math.min(1,p))*100)+'%'; if(paged) return; var y=window.scrollY+140, cur=0; secs.forEach(function(s,i){ if(s&&s.offsetTop<=y) cur=i; }); links.forEach(function(a,i){a.classList.toggle('on',i===cur);}); }
   window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
 
   if(!reduce&&'IntersectionObserver' in window){ var io=new IntersectionObserver(function(es){es.forEach(function(x){if(x.isIntersecting){x.target.classList.remove('pre');io.unobserve(x.target);}});},{rootMargin:'0px 0px -8% 0px'}); [].slice.call(document.querySelectorAll('section.block .card, section.block .tile')).forEach(function(c){ if(c.getBoundingClientRect().top>window.innerHeight){ c.classList.add('reveal','pre'); io.observe(c);} }); }
@@ -1317,20 +1328,8 @@ jobs:
   function tiltify(n){ n.addEventListener('pointermove',function(e){ if(reduce) return; var r=n.getBoundingClientRect(); var x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5; n.style.transform='perspective(900px) rotateX('+(-y*7)+'deg) rotateY('+(x*9)+'deg) translateZ(4px)'; }); n.addEventListener('pointerleave',function(){ n.style.transform=''; }); }
   [].slice.call(document.querySelectorAll('.tilt')).forEach(tiltify);
 
-  /* ---------- presenter timer ---------- */
-  var segs=[{n:'Group 5 demo',s:360},{n:'Shared teamwork discussion',s:300},{n:'Shared oversight discussion',s:180}];
-  var tSeg=0,tLeft=segs[0].s,tRun=false,tHandle=null;
-  var clock=document.getElementById('clock'),segName=document.getElementById('segName');
-  function fmt(s){ var neg=s<0; s=Math.abs(s); return (neg?'−':'')+Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
-  function paintTimer(){ clock.textContent=fmt(tLeft); clock.style.color=tLeft<0?css('--crit-ink'):tLeft<=30?css('--warn-ink'):''; segName.textContent=segs[tSeg].n+' · '+fmt(segs[tSeg].s); for(var i=0;i<3;i++){ var b=document.getElementById('bar'+i); var w=i<tSeg?100:i>tSeg?0:Math.min(100,(segs[i].s-tLeft)/segs[i].s*100); b.style.setProperty('--w',w+'%'); b.classList.toggle('over',i===tSeg&&tLeft<0); } }
-  function tick(){ tLeft--; paintTimer(); }
-  document.getElementById('tStart').addEventListener('click',function(){ tRun=!tRun; this.textContent=tRun?'Pause':'Start'; if(tRun) tHandle=setInterval(tick,1000); else clearInterval(tHandle); });
-  document.getElementById('tNext').addEventListener('click',function(){ tSeg=Math.min(2,tSeg+1); tLeft=segs[tSeg].s; paintTimer(); });
-  document.getElementById('tReset').addEventListener('click',function(){ tSeg=0; tLeft=segs[0].s; tRun=false; clearInterval(tHandle); document.getElementById('tStart').textContent='Start'; paintTimer(); });
-  paintTimer();
-
   /* ---------- ticker ---------- */
-  (function(){ var items=['<b>GOOGL</b> Q2 rev 119,796 <i class="ok">✓</i>','<b>AMZN</b> Q2 rev 200,606 <i class="ok">✓</i>','<b>META</b> Q3 rev 64,601 <i class="ok">✓</i>','<b>WCN</b> Q3 rev 2,638.1 <i class="ok">✓</i>','<b>IRDM</b> Q3 rev 245.7 <i class="ok">✓</i>','<b>FHB</b> Q3 NI 63.7 <i class="q">?</i>','<b>XTIA</b> Q2 rev 32.4 <i class="ok">✓</i>','<b>MMS</b> 8-K: no results <i class="q">?</i>','<b>GM</b> Q3 rev 50,015 <i class="ok">✓</i>','<b>BANF</b> Q3 NI 67.3 <i class="q">?</i>','<b>FIX</b> Q3 rev 3,766.3 <i class="ok">✓</i>','TUE 27 OCT: 0 of 4 SEC answers at 6:09 on all four dashboards · Chenxi re-ran at 12:17 PM: 8 of 8, 64 filers','<b>META</b> Q3 rev 64,601 live-checked on sec.gov 1:29 PM <i class="ok">✓</i>','USD millions · ✓ confirmed to the 10-Q · ? cannot check yet']; var tk=document.getElementById('ticker'); var h=items.map(function(t){return '<span>'+t+'</span>';}).join(''); tk.innerHTML=h+h; })();
+  (function(){ var items=['<b>GOOGL</b> Q2 rev 119,796 <i class="ok">✓</i>','<b>AMZN</b> Q2 rev 200,606 <i class="ok">✓</i>','<b>META</b> Q3 rev 64,601 <i class="ok">✓</i>','<b>WCN</b> Q3 rev 2,638.1 <i class="ok">✓</i>','<b>IRDM</b> Q3 rev 245.7 <i class="ok">✓</i>','<b>FHB</b> Q3 NI 63.7 <i class="q">?</i>','<b>XTIA</b> Q2 rev 32.4 <i class="ok">✓</i>','<b>MMS</b> 8-K: no results <i class="q">?</i>','<b>GM</b> Q3 rev 50,015 <i class="ok">✓</i>','<b>BANF</b> Q3 NI 67.3 <i class="q">?</i>','<b>FIX</b> Q3 rev 3,766.3 <i class="ok">✓</i>','TUE 27 OCT: 0 of 4 SEC answers at 6:09 on all four dashboards · Chenxi re-ran 12:17 PM: 8 of 8, 64 filers · Jo re-ran 11:11 PM: 10 of 10, 136 filers','<b>ABOS</b> Q3 op loss −25.8 <i class="ok">✓</i>','<b>WSO</b> Q3 rev 2,220.4 <i class="q">?</i>','<b>META</b> Q3 rev 64,601 live-checked on sec.gov 1:29 PM <i class="ok">✓</i>','USD millions · ✓ confirmed to the 10-Q · ? cannot check yet']; var tk=document.getElementById('ticker'); var h=items.map(function(t){return '<span>'+t+'</span>';}).join(''); tk.innerHTML=h+h; })();
 
   /* ---------- hero ---------- */
   (function(){
@@ -1352,7 +1351,7 @@ jobs:
       hotPos.forEach(function(p,i){ var lg=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p[0],p[1],p[2]),new THREE.Vector3(targets[i][0],targets[i][1],targets[i][2])]); grp.add(new THREE.Line(lg,new THREE.LineBasicMaterial({color:0xe2906a,transparent:true,opacity:.55}))); });
       sc.add(grp);
       var mx=0,my=0; scene.addEventListener('pointermove',function(e){ var r=scene.getBoundingClientRect(); mx=((e.clientX-r.left)/r.width-.5); my=((e.clientY-r.top)/r.height-.5); });
-      function size(){ var w=scene.clientWidth, h=scene.clientHeight; renderer.setSize(w,h,false); cam.aspect=w/h; cam.updateProjectionMatrix(); }
+      function size(){ var w=scene.clientWidth, h=scene.clientHeight; if(!w||!h) return; renderer.setSize(w,h,false); cam.aspect=w/h; cam.updateProjectionMatrix(); }
       window.addEventListener('resize',size); size();
       var t0=performance.now(), running=true;
       function frame(now){ if(!running) return; var t=(now-t0)/1000; grp.rotation.y=(reduce?0:t*0.12)+mx*0.6; grp.rotation.x=0.18+my*0.35; renderer.render(sc,cam); requestAnimationFrame(frame); }
@@ -1419,7 +1418,7 @@ jobs:
   var dashes=['Jo\'s dashboard','Chenxi\'s dashboard','Haojia\'s dashboard','Shan\'s dashboard'];
   var findings=[
     {t:'Guidance stops at the first number',w:[1,1,1,1],d:'Amazon\'s $22.5–26.5bn operating-income guide is missing on all four dashboards; Meta\'s capex outlook on all four; GM\'s EPS and free-cash-flow guides and XTI\'s margin guide where those were picked. Every assessor still scored Complete 5/5, because it rates completeness from the watcher\'s own output and never re-reads the release\'s outlook section.'},
-    {t:'The morning run reads last night\'s cache, or nothing',w:[1,1,1,1],d:'All four Monday 6:07 runs cited a GitHub fetch from the previous evening. On Tuesday it was worse: the scheduled fetch ran at 8:23 AM, the 23-hour-old cache was rejected, the routine\'s own network was refused by sec.gov (403), and every dashboard read 0 of 4 SEC answers. 64 companies filed results on Monday, Verizon, Whirlpool, Cadence and Nucor among them, and no morning watcher saw any of them. Jo\'s assessor then reported “nothing to assess”; Haojia\'s, Chenxi\'s and Shan\'s rechecked one card each and returned four “cannot check”. Chenxi recovered by hand at 12:16:58 PM: 8 of 8 answers, the 64 filings, two saved.'},
+    {t:'The morning run reads last night\'s cache, or nothing',w:[1,1,1,1],d:'All four Monday 6:07 runs cited a GitHub fetch from the previous evening. On Tuesday it was worse: the scheduled fetch ran at 8:23 AM, the 23-hour-old cache was rejected, the routine\'s own network was refused by sec.gov (403), and every dashboard read 0 of 4 SEC answers. 64 companies filed results on Monday, Verizon, Whirlpool, Cadence and Nucor among them, and no morning watcher saw any of them. Jo\'s assessor then reported “nothing to assess”; Haojia\'s, Chenxi\'s and Shan\'s rechecked one card each and returned four “cannot check”. Chenxi recovered by hand at 12:16:58 PM: 8 of 8 answers, the 64 filings, two saved. Jo recovered at 11:11 PM: 10 of 10, 136 filings for 25–27 Oct, two saved; both after the meeting.'},
     {t:'“Correct” is 5/5 with unverified figures',w:[1,1,1,1],d:'Every dashboard scores Correct at 5 when the 10-Q is not yet filed; only Useful ever carries the doubt. Maximus was scored Correct 5 with nothing extracted at all.'},
     {t:'Quotes are table rows with no column header',w:[1,1,1,0],d:'“Revenues | $ | 96,428 | $ | 119,796” lists the prior year first; Meta\'s “Revenue | $ | 64,601 | $ | 51,242” lists the current quarter first. Three dashboards; Shan\'s quotes a single column, which is unambiguous.'},
     {t:'Bank picks come back with no revenue',w:[0,1,0,1],d:'First Hawaiian (NII $174.1m, noninterest income $56.1m) and BancFirst (NII $136.0m, $51.4m) both have the components in the release; both cards say “not given”. Two dashboards, the two that drew a bank. Any total is analyst-calculated and must be labelled so; income before taxes stays a filed label, not operating income.'},
@@ -1446,75 +1445,21 @@ jobs:
   document.getElementById('dutyReset').addEventListener('click',function(){ dutyState=[]; store.set('ewp-duty',dutyState); renderDuty(); });
   renderDuty();
 
-  /* ---------- iso stack (backup) ---------- */
+  /* ---------- iso stack ---------- */
   var layers=[
     {k:'L1',t:'SEC EDGAR',human:false,d:['Full-text search for 8-K filings carrying item 2.02, “Results of Operations and Financial Condition”.','Submissions API for the three watchlist CIKs; companyfacts XBRL for every filed value.','One source. Nothing else is read.']},
-    {k:'L2',t:'GitHub fetch and cache',human:false,d:['A workflow pulls the SEC answers into sec_cache/ and commits them.','The routines read the cache, never EDGAR directly; the cache is accepted for up to 20 hours.','Gap 2 lives here: the Monday 6:07 runs read a cache filled the previous evening; on Tuesday the cache was 23 hours old and rejected, and every dashboard read nothing until Chenxi re-ran by hand at 12:16:58 PM.']},
+    {k:'L2',t:'GitHub fetch and cache',human:false,d:['A workflow pulls the SEC answers into sec_cache/ and commits them.','The routines read the cache, never EDGAR directly; the cache is accepted for up to 20 hours.','Gap 2 lives here: the Monday 6:07 runs read a cache filled the previous evening; on Tuesday the cache was 23 hours old and rejected, and every dashboard read nothing until Chenxi re-ran by hand at 12:16:58 PM and Jo at 11:11 PM.']},
     {k:'L3',t:'Watcher · 6:07 AM',human:false,d:['Lists who reported since the last run; saves the latest results for Alphabet, Amazon, Meta and two random filers.','Four figures with quotes, guidance, two to four management claims, tone.','Writes extractions.json, radar.json and the day\'s watch brief.']},
     {k:'L4',t:'Assessor · 6:37 AM',human:false,d:['Checks each quote against the release and each figure against the 10-Q through XBRL (0.5%; EPS to the cent).','Builds the fundamentals table, judges each claim, rates S1 Correct, S2 Complete, S3 Useful.','Re-checks anything unconfirmed for ten mornings; writes assessments.json and the assess brief.']},
     {k:'L5',t:'Static page and briefs',human:false,d:['A page on Vercel or GitHub Pages reads the JSON and Markdown; no server, no database.','Every card links to the press release and filing index on sec.gov.','Run log, timeline and every brief are kept for the audit trail.']},
-    {k:'L6',t:'Duty analyst · 7:15 AM',human:true,d:['Reads the sources line, the run log and any mismatch or cannot-check verdicts.','Opens the release for any figure that will be used in the 8:30 meeting.','The only layer that can see what is missing. Section 05 is this layer\'s checklist.']}
+    {k:'L6',t:'Duty analyst · 7:15 AM',human:true,d:['Reads the sources line, the run log and any mismatch or cannot-check verdicts.','Opens the release for any figure that will be used in the 8:30 meeting.','The only layer that can see what is missing. Section 06 is this layer\'s checklist.']}
   ];
   var stack=document.getElementById('stack'), isoDetail=document.getElementById('isoDetail'), isoSel=5;
   layers.forEach(function(L,i){ var d=el('div','layer'); d.style.transform='translateZ('+(i*34)+'px)'; d.innerHTML='<span class="lab">'+L.k+' · '+L.t+'</span>'; if(L.human){ d.style.borderColor='#e2906a'; } d.addEventListener('click',function(){ isoSel=i; renderIso(); }); d.addEventListener('mouseenter',function(){ d.style.transform='translateZ('+(i*34+22)+'px)'; }); d.addEventListener('mouseleave',function(){ d.style.transform='translateZ('+(i*34)+'px)'; }); stack.appendChild(d); });
   function renderIso(){ [].slice.call(stack.children).forEach(function(d,i){ d.classList.toggle('on',i===isoSel); }); var L=layers[isoSel]; clear(isoDetail); var nav=el('div','iso-nav'); layers.forEach(function(x,i){ var b=el('button',null,x.k); b.type='button'; b.setAttribute('aria-pressed',i===isoSel?'true':'false'); b.addEventListener('click',function(){ isoSel=i; renderIso(); }); nav.appendChild(b); }); isoDetail.appendChild(nav); isoDetail.appendChild(el('h3',null,'<span class="k">'+L.k+'</span>'+L.t+(L.human?' <span class="pill human"><i></i>Human</span>':''))); var ul=el('ul'); L.d.forEach(function(s){ ul.appendChild(el('li',null,s)); }); isoDetail.appendChild(ul); }
   renderIso();
 
-  /* ---------- requirements (backup) ---------- */
-  var reqs=[
-    {id:'R01',cat:'Coverage',t:'List every US company that filed earnings results since the last run',s:'met',ev:'EDGAR full-text search for 8-K item 2.02, de-duplicated by accession; 365–366 filers for 18–25 Oct on every dashboard, watchlist flagged, 300-row cap with a note.'},
-    {id:'R02',cat:'Coverage',t:'Cover the watchlist: Alphabet, Amazon, Meta',s:'met',ev:'Latest 8-K per CIK from the submissions API; Meta\'s 21 Oct results picked up on the first run.'},
-    {id:'R03',cat:'Coverage',t:'Pick two companies at random from that day\'s filers',s:'part',ev:'Two picks on every dashboard, but one was a Maximus 8-K whose item 2.02 is a leverage ratio beside an acquisition; no replacement was drawn.'},
-    {id:'R04',cat:'Extraction',t:'Revenue, operating income, net income, diluted EPS, each with a quote',s:'met',ev:'31 distinct figures confirmed, none mismatched, in the 25–26 October snapshot; Meta\'s revenue also held up to a timed live check on 27 October. Gap: the two bank picks returned revenue and operating income as “not given”; the releases carry NII and noninterest income as filed labels.'},
-    {id:'R05',cat:'Extraction',t:'Write down the guidance in full',s:'not',ev:'Only the first guided number is captured on all four dashboards: Amazon\'s operating-income guide, Meta\'s expense and capex outlook, GM\'s EPS and free-cash-flow guides and XTI\'s margin guide are missing.'},
-    {id:'R06',cat:'Extraction',t:'Two to four things management says, each quoted',s:'met',ev:'Counts of 2–4 everywhere. Selection varies: Comfort Systems\' backlog and cash flow were passed over; one dashboard reused the guidance sentence as a claim.'},
-    {id:'R07',cat:'Extraction',t:'Record the tone of the release',s:'met',ev:'Present everywhere. Two watchers called Meta positive and were overruled by their assessor; two called it balanced.'},
-    {id:'R08',cat:'Verification',t:'Check each quote against the release',s:'met',ev:'quote_found is true for every figure and claim; one assessor also tested bank claims against the release\'s own tables.'},
-    {id:'R09',cat:'Verification',t:'Check each figure against the quarterly filing',s:'met',ev:'XBRL companyfacts, 0.5% tolerance, EPS to the cent. Gap: Waste Connections no longer tags NetIncomeLoss, so one figure can never confirm under the current tag list.'},
-    {id:'R10',cat:'Verification',t:'Build a fundamentals table',s:'met',ev:'This quarter, a year ago, previous quarter, both changes, operating and net margin, for every card.'},
-    {id:'R11',cat:'Verification',t:'Judge management\'s claims against the numbers',s:'met',ev:'Matches, does not match or cannot check with a reason. All four assessors flagged Meta\'s “investments are paying off” against a 36.8% profit fall.'},
-    {id:'R12',cat:'Verification',t:'Rate the watcher: Correct, Complete, Useful',s:'part',ev:'Ratings exist, but Complete is scored from the watcher\'s output and cannot see omissions (5/5 with guidance missing); two dashboards changed scores on a recheck with nothing new filed.'},
-    {id:'R13',cat:'Reader',t:'Usable by a Singapore analyst before 8:30 AM without opening sources',s:'part',ev:'Singapore times, US filing dates flagged, briefs with links. Table-row quotes do not say which column is this quarter on three dashboards.'},
-    {id:'R14',cat:'Controls',t:'Never recommend buying or selling',s:'met',ev:'No buy, sell, overweight, underweight, target-price or outperform language in any page, JSON file or brief; disclaimer shown twice per page.'},
-    {id:'R15',cat:'Controls',t:'Read only SEC sources; no connectors; send nothing',s:'met',ev:'config.json names sec.gov, efts.sec.gov and data.sec.gov only. Confirmed from outputs.'},
-    {id:'R16',cat:'Controls',t:'Run on schedule with data fresh at the time of the run',s:'not',ev:'The agents fire on time, but the data does not: Monday\'s 6:07 runs read a cache from the previous evening, and Tuesday\'s read nothing at all (0 of 4 SEC answers on every dashboard; fetch landed at 8:23 AM; cache 23 h old; direct network blocked). Chenxi\'s hand re-run at 12:16:58 PM recovered the day, which is not a schedule.'},
-    {id:'R17',cat:'Controls',t:'Keep an audit trail: briefs, run log, sources per run',s:'part',ev:'Run log and sources exist. Briefs are keyed by date, so a re-run overwrote the brief that recorded the backfill on one dashboard.'},
-    {id:'R18',cat:'Controls',t:'Timing that survives US clock changes',s:'part',ev:'6:07 AM Singapore is 6:07 PM New York now and 5:07 PM from 1 November, inside EDGAR\'s filing day.'}
-  ];
-  var reqGrid=document.getElementById('reqGrid'), reqF='all', reqC='all'; var sLabel={met:'Met',part:'Partly',not:'Not met'};
-  reqs.forEach(function(r){ var c=el('div','card tilt'); c.setAttribute('data-s',r.s); c.setAttribute('data-c',r.cat); c.innerHTML='<div class="id">'+r.id+'</div><div class="t">'+r.t+'</div><div class="ev">'+r.ev+'</div><div class="foot"><span class="cat">'+r.cat+'</span><span class="pill '+r.s+'"><i></i>'+sLabel[r.s]+'</span></div>'; reqGrid.appendChild(c); tiltify(c); });
-  function applyReq(){ var n=0; [].slice.call(reqGrid.children).forEach(function(c){ var ok=(reqF==='all'||c.getAttribute('data-s')===reqF)&&(reqC==='all'||c.getAttribute('data-c')===reqC); c.hidden=!ok; if(ok) n++; }); var m=reqs.filter(function(r){return r.s==='met';}).length, p=reqs.filter(function(r){return r.s==='part';}).length, x=reqs.length-m-p; document.getElementById('reqCount').textContent=n+' shown · overall '+m+' met, '+p+' partly, '+x+' not met'; }
-  document.getElementById('reqFilter').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; reqF=b.getAttribute('data-f'); [].slice.call(e.currentTarget.children).forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');}); applyReq(); });
-  document.getElementById('reqCat').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; reqC=b.getAttribute('data-c'); [].slice.call(e.currentTarget.children).forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');}); applyReq(); });
-  applyReq();
-
-  /* ---------- risks (backup) ---------- */
-  var risks=[
-    {k:'K1',t:'Guidance omitted',L:3,I:3,c:'Assessor re-reads the outlook section and docks Complete; duty analyst opens the outlook for any watchlist name.',o:'Tool owner',s:'Open'},
-    {k:'K2',t:'Stale or missing data at the run',L:3,I:3,c:'Realised on 27 Oct on all four dashboards (0 of 4 answers); Chenxi recovered by a hand re-run at 12:16:58 PM. Several early fetch slots so one lands before 6:07, each made after EDGAR\'s 5:30 PM New York cutoff for the previous US business day; a longer cache window only admits older answers and is not a fix on its own; assessor reports “watcher read nothing”; sources line checked at 7:15.',o:'Tool owner',s:'Open'},
-    {k:'K3',t:'Wrong random pick',L:2,I:2,c:'Watcher confirms the exhibit is an earnings release before saving; otherwise records why and redraws.',o:'Tool owner',s:'Open'},
-    {k:'K4',t:'Bank and insurer formats',L:3,I:2,c:'Preserve the filing\'s labels: NII and noninterest income as filed; any total revenue is analyst-calculated and labelled so; income before income taxes is shown under its own name, never as operating income.',o:'Tool owner',s:'Open'},
-    {k:'K5',t:'Audit trail lost',L:1,I:3,c:'Briefs named by run time; never overwrite a brief that saved results.',o:'Tool owner',s:'Open'},
-    {k:'K6',t:'Unstable scores',L:2,I:1,c:'Freeze scores between rechecks unless a new filing arrives.',o:'Tool owner',s:'Open'},
-    {k:'K7',t:'Advice-like language',L:1,I:3,c:'Weekly grep of briefs; disclaimer on page and brief; compliance read.',o:'Compliance',s:'Controlled'},
-    {k:'K8',t:'EDGAR outage or rate limit',L:2,I:2,c:'Retries with pauses; “source failed” flag on the timeline; previous page used with date stated.',o:'Duty analyst',s:'Controlled'},
-    {k:'K9',t:'Over-reliance by analysts',L:2,I:3,c:'Human-in-the-loop mode; no figure to a meeting note without the 7:15 check.',o:'Team',s:'Controlled'}
-  ];
-  var mx=document.getElementById('mx'), riskDetail=document.getElementById('riskDetail'), rSel=0;
-  function renderRisk(){ clear(mx); var Lname=['','Low','Medium','High']; for(var L=3;L>=1;L--){ mx.appendChild(el('div','ax y',Lname[L]+' likelihood')); for(var I=1;I<=3;I++){ var score=L*I; var cell=el('div','cell '+(score>=6?'h':score>=3?'m':'l')); risks.forEach(function(r,i){ if(r.L===L&&r.I===I){ var b=el('button','rk'+(i===rSel?' on':''),r.k); b.type='button'; b.setAttribute('data-tip','<b>'+r.k+' '+r.t+'</b><br>'+Lname[r.L]+' likelihood · '+Lname[r.I]+' impact'); b.addEventListener('click',function(){ rSel=i; renderRisk(); }); cell.appendChild(b); } }); mx.appendChild(cell);} } mx.appendChild(el('div','ax','')); ['Low impact','Medium impact','High impact'].forEach(function(t){ mx.appendChild(el('div','ax',t)); }); var r=risks[rSel]; clear(riskDetail); var c=el('div','card'); c.innerHTML='<div class="chips" style="margin-bottom:8px"><span class="pill neutral"><i></i>'+r.k+'</span><span class="pill '+(r.s==='Open'?'part':'met')+'"><i></i>'+r.s+'</span></div><h3>'+r.t+'</h3><dl><dt>Likelihood</dt><dd>'+Lname[r.L]+'</dd><dt>Impact</dt><dd>'+Lname[r.I]+'</dd><dt>Control</dt><dd>'+r.c+'</dd><dt>Owner</dt><dd>'+r.o+'</dd></dl>'; riskDetail.appendChild(c); }
-  renderRisk();
-
-  /* ---------- controls (backup) ---------- */
-  var fixes=['Give the SEC fetch several early slots after EDGAR\'s 5:30 PM New York cutoff (5:30 AM Singapore now, 6:30 AM from 1 November) so one lands before the watcher, and call the brief current only when its sources line cites a fetch that covers the previous US business day. A 26-hour cache limit on its own would admit the previous morning\'s answers, which do not hold Monday\'s earnings. Have the assessor report “watcher read nothing” rather than “nothing to assess”','Name briefs by run time; never overwrite a brief that saved results','Guidance as a list of every guided item; assessor re-reads the outlook and docks Complete','Confirm a radar pick is an earnings release before saving; redraw if not','Bank rule: show NII, noninterest income and income before taxes under the filing\'s own labels; mark any total as analyst-calculated','Freeze scores between rechecks; let Correct carry the doubt when the 10-Q is not filed','Quote the column header with the row; add fallback XBRL tags; say “10-Q filed, tagged differently”'];
-  var conds=['On every morning, a fetch made after EDGAR\'s cutoff for the previous US business day and before the 6:07 run, and 0-of-N mornings reported as failures','Zero mismatches from assessor and duty analyst','Guidance completeness check live and matching a hand sample','Every brief and run-log link resolves to the brief that run wrote','Bank and non-earnings picks handled without a blank card','No advice-language hits in the weekly screen'];
-  var fixState=store.get('ewp-fixes',[]), condState=store.get('ewp-conds',[]);
-  var fixList=document.getElementById('fixList'), condList=document.getElementById('condList');
-  function renderFixes(){ clear(fixList); fixes.forEach(function(t,i){ var li=el('li',fixState[i]?'done':''); var cb=el('input'); cb.type='checkbox'; cb.id='fix'+i; cb.checked=!!fixState[i]; cb.addEventListener('change',function(){ fixState[i]=cb.checked; store.set('ewp-fixes',fixState); li.classList.toggle('done',cb.checked); drawGauge(); }); var lab=el('label',null,'<span>'+(i+1)+'. '+t+'</span>'); lab.setAttribute('for','fix'+i); li.appendChild(cb); li.appendChild(lab); fixList.appendChild(li); }); }
-  function renderConds(){ clear(condList); conds.forEach(function(t,i){ var li=el('li'); var cb=el('input'); cb.type='checkbox'; cb.id='cond'+i; cb.checked=!!condState[i]; cb.addEventListener('change',function(){ condState[i]=cb.checked; store.set('ewp-conds',condState); drawGauge(); }); var lab=el('label',null,t); lab.setAttribute('for','cond'+i); li.appendChild(cb); li.appendChild(lab); li.appendChild(el('span','pill '+(condState[i]?'met':'neutral'),'<i></i>'+(condState[i]?'Held 10 mornings':'Not yet'))); condList.appendChild(li); }); }
-  function drawGauge(){ var nf=fixState.filter(Boolean).length, nc=condState.filter(Boolean).length; var p=(nf/fixes.length*0.4+nc/conds.length*0.6); var svg=document.getElementById('gauge'); clear(svg); var NS='http://www.w3.org/2000/svg'; function arc(r,from,to,stroke,w){ var a0=Math.PI*(1+from), a1=Math.PI*(1+to); var x0=60+r*Math.cos(a0),y0=60+r*Math.sin(a0),x1=60+r*Math.cos(a1),y1=60+r*Math.sin(a1); var path=document.createElementNS(NS,'path'); path.setAttribute('d','M'+x0+' '+y0+' A'+r+' '+r+' 0 '+((to-from)>.5?1:0)+' 1 '+x1+' '+y1); path.setAttribute('fill','none'); path.setAttribute('stroke',stroke); path.setAttribute('stroke-width',w); path.setAttribute('stroke-linecap','round'); svg.appendChild(path); } arc(46,0,1,css('--surface-2'),12); if(p>0) arc(46,0,Math.max(.02,p),p>=1?css('--good'):css('--accent'),12); var t=document.createElementNS(NS,'text'); t.setAttribute('x',60); t.setAttribute('y',62); t.setAttribute('text-anchor','middle'); t.setAttribute('font-size','26'); t.setAttribute('font-weight','600'); t.setAttribute('fill',css('--ink')); t.setAttribute('font-family',css('--font-display')); t.textContent=Math.round(p*100)+'%'; svg.appendChild(t); var s=document.createElementNS(NS,'text'); s.setAttribute('x',60); s.setAttribute('y',80); s.setAttribute('text-anchor','middle'); s.setAttribute('font-size','9'); s.setAttribute('fill',css('--muted')); s.textContent='READY'; svg.appendChild(s); document.getElementById('gaugeText').innerHTML='<b>'+nf+' of '+fixes.length+'</b> fixes shipped and <b>'+nc+' of '+conds.length+'</b> gate conditions held. '+(p>=1?'The gate is met.':'Mode stays human-in-the-loop.'); renderConds(); }
-  renderFixes(); drawGauge();
-
-  /* ---------- ledger (backup) ---------- */
+  /* ---------- ledger ---------- */
   var ledger=[
     {c:'Alphabet',a:'0001652044-26-000066',u:'https://www.sec.gov/Archives/edgar/data/1652044/000165204426000066/googexhibit991q22026.htm',w:'Four figures, column order, CFO highlight quote, $98.0bn other-income sentence, guidance',r:'Figures and quotes exact; no guidance given, correctly recorded',k:'ok'},
     {c:'Amazon',a:'0001018724-26-000024',u:'https://www.sec.gov/Archives/edgar/data/1018724/000101872426000024/amzn-20260630xex991.htm',w:'Four figures, AWS and advertising growth, full Q3 guidance section',r:'Figures exact; operating-income guide $22.5–26.5bn and ~80 bp FX drag missing on all dashboards',k:'gap'},
@@ -1527,7 +1472,7 @@ jobs:
     {c:'Comfort Systems USA',a:'0001104659-26-118156',u:'https://www.sec.gov/Archives/edgar/data/1035983/000110465926118156/fix-ex99d1.htm',w:'Four figures, backlog, cash flow, outlook',r:'Figures exact; backlog $17.81bn and >$1bn cash flow missing',k:'gap'},
     {c:'BancFirst',a:'0001193125-26-427999',u:'https://www.sec.gov/Archives/edgar/data/760498/000119312526427999/banf-ex99_1.htm',w:'Net income, EPS, NII, noninterest income, income before taxes, NIM, acquisition',r:'NII $136.0m and noninterest income $51.4m as filed; revenue left blank',k:'gap'},
     {c:'Waste Connections',a:'XBRL company-concept API',u:'https://data.sec.gov/api/xbrl/companyconcept/CIK0001318220/us-gaap/NetIncomeLoss.json',w:'NetIncomeLoss and ProfitLoss series for 2026',r:'NetIncomeLoss ends FY2025; the 10-Q is filed but the recheck can never confirm under the current tags',k:'gap'},
-    {c:'Tuesday 27 Oct runs',a:'runs.json · briefs · commit log',u:'https://ywanwah-earnings-extractor-assessor.vercel.app/#brief=2026-10-27-watch',w:'Both briefs, data/runs.json, the sec_cache manifest and the repository commit times on all four dashboards',r:'0 of 4 SEC answers at 6:09 on every dashboard; Jo\'s assessor checked nothing, the other three rechecked one card each (four cannot check); Jo\'s fetch at 8:23 and 8:49 AM, cache 23 h old, 64 Monday filers unread until Chenxi\'s 12:16:58 PM re-run (8 of 8, 64 filings, two saved; 12:20 PM assessor 3 checked, 12 cannot check)',k:'gap'},
+    {c:'Tuesday 27 Oct runs',a:'runs.json · briefs · commit log',u:'https://ywanwah-earnings-extractor-assessor.vercel.app/#brief=2026-10-27-watch',w:'Both briefs, data/runs.json, the sec_cache manifest and the repository commit times on all four dashboards',r:'0 of 4 SEC answers at 6:09 on every dashboard; Jo\'s assessor checked nothing, the other three rechecked one card each (four cannot check); Jo\'s fetch at 8:23 and 8:49 AM, cache 23 h old, 64 Monday filers unread until Chenxi\'s 12:16:58 PM re-run (8 of 8, 64 filings, two saved; 12:20 PM assessor 3 checked, 12 cannot check) and Jo\'s 11:08 PM hand fetch with 11:11 and 11:15 PM runs (10 of 10, 136 filings for 25–27 Oct; Acumen 3 confirmed to the 10-Q, Watsco 4 cannot check); the re-run overwrote the 6:09 brief',k:'gap'},
     {c:'Meta Platforms · live check',a:'0001628280-26-066773',u:'https://www.sec.gov/Archives/edgar/data/1326801/000162828026066773/0001628280-26-066773-index.htm',w:'Timed check on sec.gov, Tue 27 Oct 2026 1:29 PM Singapore: 10-Q filing index, R4 income statement and the companyfacts fact',r:'Revenue $64,601 million for the three months ended 30 Sep 2026, in USD millions, equals the watcher\'s figure and the XBRL value; companyconcept lagged behind',k:'ok'}
   ];
   var ltb=document.querySelector('#ledger tbody'), lf='all';
@@ -1535,13 +1480,32 @@ jobs:
   document.getElementById('ledgerFilter').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; lf=b.getAttribute('data-f'); [].slice.call(e.currentTarget.children).forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');}); renderLedger(); });
   renderLedger();
 
-  /* ---------- T1–T8 (backup) ---------- */
+  /* ---------- T1–T8 ---------- */
   var T=['T1 Understood teammates\' agents','T2 Checked before relying','T3 Agreed what good looks like','T4 Noticed wrong output quickly','T5 Trust changed after checks','T6 Work shared fairly','T7 Took less time than alone','T8 Would use it in my job'];
   var team=[{name:'Jo',me:true,own:[4,5,3,2,4,5,5,5],guess:[4,5,3,3,4,5,5,5]},{name:'Haojia',own:[4,5,3,2,4,4,5,5],guess:[4,5,3,2,4,4,5,5]},{name:'Chenxi',own:[4,3,3,2,4,4,4,5],guess:[4,3,3,2,4,4,4,5]},{name:'Shan',own:[5,4,4,4,4,5,5,5],guess:[4,3,4,3,4,4,5,5]}];
   var ramp={1:'#d9eceb',2:'#a9d6d3',3:'#6fbab5',4:'#2f8f8a',5:'#0f6f6b'};
   (function(){ var heat=document.getElementById('heat'); ['Statement','Jo','Haojia','Chenxi','Shan','Team mean'].forEach(function(t){heat.appendChild(el('div','hh',t));}); var means=T.map(function(_,i){ return team.reduce(function(a,m){return a+m.own[i];},0)/team.length; }); var min=Math.min.apply(null,means); T.forEach(function(t,i){ heat.appendChild(el('div','st',t)); team.forEach(function(m){ var c=el('div','cell'+(m.me?' me':'')); c.style.background=ramp[m.own[i]]; c.style.color=m.own[i]>=4?'#fff':'#0b1b1a'; c.innerHTML='<b>'+m.own[i]+'</b><small>guess '+m.guess[i]+'</small>'; c.setAttribute('data-tip','<b>'+m.name+'</b> · '+t+'<br>Own '+m.own[i]+' · guessed teammates '+m.guess[i]); heat.appendChild(c); }); heat.appendChild(el('div','cell mean'+(means[i]===min?' lo':''),'<b>'+means[i].toFixed(2).replace(/\.?0+$/,'')+'</b>')); }); })();
 
-  if(location.hash){ var tgt=document.querySelector(location.hash); if(tgt) setTimeout(function(){ tgt.scrollIntoView(); },50); }
+  /* ---------- slide mode ---------- */
+  var paged=false, pgIdx=0, pages=[]; var segMins={'1':2,'2':3,'3':7,'4':4,'5':4};
+  var mainEl=document.querySelector('main');
+  [].slice.call(document.querySelectorAll('section.block[data-split]')).forEach(function(sec){ var grp=null; [].slice.call(sec.children).forEach(function(k){ if(k.tagName==='H3'){ grp=el('div','sub'); sec.insertBefore(grp,k); grp.appendChild(k); } else if(grp){ grp.appendChild(k); } }); });
+  pages.push({el:document.getElementById('hero'),sec:null,sub:null,num:'',title:'Earnings Watch'});
+  [].slice.call(mainEl.children).forEach(function(sec){ if(sec.tagName!=='SECTION') return; var num=(sec.querySelector('.eyebrow')||{textContent:''}).textContent, title=(sec.querySelector('h2')||{textContent:''}).textContent; var subs=[].slice.call(sec.children).filter(function(c){return c.classList&&c.classList.contains('sub');}); if(subs.length){ subs.forEach(function(s,i){ pages.push({el:sec,sec:sec,sub:s,subIndex:i,subCount:subs.length,num:num,title:title,subTitle:(s.querySelector('h3')||{textContent:''}).textContent}); }); } else pages.push({el:sec,sec:sec,sub:null,num:num,title:title}); });
+  var pgLabel=document.getElementById('pgLabel'), pgCount=document.getElementById('pgCount'), pgPrev=document.getElementById('pgPrev'), pgNext=document.getElementById('pgNext');
+  var presenters={2:'Chenxi',3:'Chenxi',4:'Jo',5:'Jo',6:'Jo',7:'Jo',8:'Jo',9:'Shan',10:'Shan',11:'Shan',12:'Haojia',13:'Haojia',14:'Shan',15:'Jo',16:'Jo',17:'Jo',18:'Haojia'};
+  pages.forEach(function(q){ if(q.sec){ var row=q.sec.querySelector('.segrow'); if(row&&!row.querySelector('.presenter')) row.appendChild(el('span','presenter')); } });
+  function paintWho(){ pages.forEach(function(q,i){ if(!q.sec) return; var badge=q.sec.querySelector('.presenter'); if(!badge) return; if(paged){ if(i===pgIdx) badge.textContent=presenters[i+1]?'Presenter · '+presenters[i+1]:''; } else { var names=[]; pages.forEach(function(r,j){ if(r.sec===q.sec&&presenters[j+1]&&names.indexOf(presenters[j+1])<0) names.push(presenters[j+1]); }); badge.textContent=names.length?(names.length>1?'Presenters · ':'Presenter · ')+names.join(', '):''; } }); }
+  function showPage(i,keepScroll){ i=Math.max(0,Math.min(pages.length-1,i)); pgIdx=i; var p=pages[i]; pages.forEach(function(q){ q.el.classList.remove('page-on'); if(q.sub) q.sub.classList.remove('sub-on'); if(q.sec) q.sec.classList.remove('sub-after'); }); p.el.classList.add('page-on'); if(p.sub){ p.sub.classList.add('sub-on'); if(p.subIndex>0) p.sec.classList.add('sub-after'); } [].slice.call(p.el.querySelectorAll('.reveal.pre')).forEach(function(c){ c.classList.remove('pre'); }); links.forEach(function(a){ a.classList.toggle('on',!!p.sec&&a.getAttribute('href')==='#'+p.sec.id); }); var sg=p.el.getAttribute('data-seg'); var segTag=sg?'<span class="pg-seg">Seg '+sg+' · '+segMins[sg]+' min</span>':'<span class="pg-seg ref">Reference</span>'; pgLabel.innerHTML=segTag+(p.sec?'<b>'+esc(p.num)+'</b>'+(p.sub?' · '+esc(p.subTitle)+' <span class="muted">'+(p.subIndex+1)+' of '+p.subCount+'</span>':''):'<b>Earnings Watch</b> · Group 5'); pgCount.textContent=(i+1)+' / '+pages.length; pgPrev.disabled=i===0; pgNext.disabled=i===pages.length-1; if(!keepScroll) window.scrollTo(0,0); var h=p.sec?('#'+p.sec.id+(p.sub&&p.subIndex>0?'/'+(p.subIndex+1):'')):'#top'; try{ history.replaceState(null,'',h); }catch(e){} paintWho(); window.dispatchEvent(new Event('resize')); onScroll(); }
+  function pageOfHash(h){ var m=/^#([^\/]+)(?:\/(\d+))?$/.exec(h||''); if(!m||m[1]==='top') return [0,null]; var t=document.getElementById(m[1]); if(!t) return [-1,null]; var n=m[2]?parseInt(m[2],10)-1:0; for(var i=0;i<pages.length;i++){ var p=pages[i]; if(p.sec===t||p.el===t){ if(!p.sub||p.subIndex===n) return [i,null]; } } for(var j=0;j<pages.length;j++){ var q=pages[j]; if((q.sub||q.el).contains(t)) return [j,t]; } return [-1,null]; }
+  function goHash(h){ var r=pageOfHash(h); if(r[0]<0) return false; showPage(r[0]); if(r[1]) setTimeout(function(){ r[1].scrollIntoView({block:'start'}); },30); return true; }
+  function setMode(m,init){ paged=(m==='slides'); document.body.classList.toggle('paged',paged); store.set('ewp-view',m); paintWho(); [].slice.call(document.querySelectorAll('#viewSeg button')).forEach(function(b){ b.setAttribute('aria-pressed',b.getAttribute('data-v')===m?'true':'false'); }); document.getElementById('slideHint').hidden=!paged; if(paged){ if(!(init&&location.hash&&goHash(location.hash))) showPage(pgIdx); } else { var p=pages[pgIdx]; var mm=/^#([^\/]+)/.exec(location.hash||''); var tgt=init&&mm?document.getElementById(mm[1]):null; setTimeout(function(){ if(tgt) tgt.scrollIntoView(); else if(!init&&p.sec) (p.sub||p.el).scrollIntoView(); onScroll(); },50); } }
+  pgPrev.addEventListener('click',function(){ showPage(pgIdx-1); }); pgNext.addEventListener('click',function(){ showPage(pgIdx+1); });
+  document.getElementById('viewSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(b) setMode(b.getAttribute('data-v')); });
+  document.addEventListener('click',function(e){ if(!paged) return; var a=e.target.closest&&e.target.closest('a[href^="#"]'); if(!a) return; var h=a.getAttribute('href'); if(h.length<2) return; if(goHash(h)) e.preventDefault(); });
+  document.addEventListener('keydown',function(e){ if(!paged||e.altKey||e.ctrlKey||e.metaKey) return; var t=e.target, tag=(t.tagName||'').toLowerCase(); if(tag==='input'||tag==='textarea'||tag==='select'||t.isContentEditable) return; var k=e.key; if(k==='ArrowRight'||k==='PageDown'||(k===' '&&!e.shiftKey&&tag!=='button'&&tag!=='a')){ e.preventDefault(); showPage(pgIdx+1); } else if(k==='ArrowLeft'||k==='PageUp'||(k===' '&&e.shiftKey)){ e.preventDefault(); showPage(pgIdx-1); } else if(k==='Home'){ e.preventDefault(); showPage(0); } else if(k==='End'){ e.preventDefault(); showPage(pages.length-1); } });
+  window.addEventListener('hashchange',function(){ if(paged) goHash(location.hash); });
+  setMode(store.get('ewp-view','slides'),true);
 })();
 </script>
 
